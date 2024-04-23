@@ -10,7 +10,6 @@ function ProviderFooter({
 	setApiKey,
 	handleDisconnect
 }) {
-	console.log(provider)
 	if (loading) {
 		return <FooterLoading show={loading} />
 	} else if (provider) {

@@ -1,6 +1,4 @@
 import React from "react"
-import { useDispatch } from "react-redux"
-import { CircleLoader } from "react-spinners"
 
 function FooterAuthenticated({ handleDisconnect }) {
 	return (
@@ -8,9 +6,7 @@ function FooterAuthenticated({ handleDisconnect }) {
 			<h3 className="text-lg font-semibold text-gray-800 text-center mb-5">
 				Connected
 			</h3>
-			{/* <div className="my-4 mx-3 flex justify-center">
-				<CircleLoader color="#3f51b5" />
-			</div> */}
+
 			<button
 				type="submit"
 				onClick={handleDisconnect}
