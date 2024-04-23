@@ -8,6 +8,7 @@ import { disconnectProvider } from "~core/reducers/modelSlice"
 import { endSession } from "~core/reducers/sessionSlice"
 import Header from "~core/shared/Header"
 import Layout from "~core/shared/Layout"
+import Section from "~core/shared/Section"
 import type { AppDispatch } from "~core/store"
 import ProviderDropdown from "./components/ProviderDropdown"
 import ProviderFooter from "./components/ProviderFooter"
@@ -38,7 +39,7 @@ function ProviderView() {
 
 	return (
 		<Layout>
-			<form className="bg-slate-100 dark:bg-slate-700 p-6 rounded-md shadow-md">
+			<Section>
 				<Header text={"LLM Provider"} />
 				<div className="flex flex-col items-center">
 					<img
@@ -67,7 +68,7 @@ function ProviderView() {
 					setApiKey={setApiKey}
 					handleDisconnect={handleDisconnect}
 				/>
-			</form>
+			</Section>
 		</Layout>
 	)
 }

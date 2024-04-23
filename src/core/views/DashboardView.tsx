@@ -5,6 +5,7 @@ import type { RootState } from "~core/reducers"
 import { endSession, startSession } from "~core/reducers/sessionSlice"
 import Header from "~core/shared/Header"
 import Layout from "~core/shared/Layout"
+import Section from "~core/shared/Section"
 import type { AppDispatch } from "~core/store"
 
 export default function DashboardView() {
@@ -24,7 +25,7 @@ export default function DashboardView() {
 
 	return (
 		<Layout>
-			<div className="bg-slate-100 dark:bg-slate-700 p-6 rounded-md shadow-md my-4">
+			<Section>
 				<Header text={"PII/PCI"} />
 				<div className="flex justify-around">
 					<div className="flex-col">
@@ -34,8 +35,8 @@ export default function DashboardView() {
 						<p className="font-medium">API</p>
 					</div>
 				</div>
-			</div>
-			<div className="flex flex-row justify-around bg-slate-100 dark:bg-slate-700 p-6 rounded-md shadow-md my-4">
+			</Section>
+			<Section>
 				{!isOn ? (
 					<button
 						onClick={handleSessionStart}
@@ -49,7 +50,7 @@ export default function DashboardView() {
 						End
 					</button>
 				)}
-			</div>
+			</Section>
 		</Layout>
 	)
 }
