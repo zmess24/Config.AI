@@ -1,10 +1,19 @@
-function RuleForm({
-	handleSubmit,
-	ruleName,
-	setRuleName,
-	ruleExampleValue,
-	setRuleExampleValue
-}) {
+import { useState } from "react"
+import { useDispatch } from "react-redux"
+import { addRule } from "~core/reducers/settingsSlice"
+import type { AppDispatch } from "~core/store"
+
+function RuleForm({}) {
+	const [ruleName, setRuleName] = useState("")
+	const [ruleExampleValue, setRuleExampleValue] = useState("")
+	const dispatch: AppDispatch = useDispatch()
+
+	const handleSubmit = (e) => {
+		e.preventDefault()
+		dispatch(addRule({ ruleName, ruleExampleValue }))
+		setRuleName("")
+		setRuleExampleValue("")
+	}
 	return (
 		<form className="flex flex-col" onSubmit={handleSubmit}>
 			<input
