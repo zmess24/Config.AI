@@ -3,5 +3,5 @@ import storage from "@plasmohq/redux-persist/lib/storage" // defaults to localSt
 export const persistConfig = {
 	key: "root",
 	storage,
-	whitelist: ["models", "session"]
+	whitelist: ["models", "session", "settings"]
 }

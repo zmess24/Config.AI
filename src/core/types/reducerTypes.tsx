@@ -13,6 +13,12 @@ export interface SessionStateTypes {
 	isOn: boolean
 }
 
+interface RuleTypes {
+	id: number
+	ruleName: string
+	ruleExampleValue: string
+}
+
 export interface SettingsStateTypes {
-	rules: object
+	rules: Array<RuleTypes>
 }
