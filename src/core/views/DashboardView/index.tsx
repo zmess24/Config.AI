@@ -1,3 +1,4 @@
+import { CloudIcon, CodeBracketSquareIcon } from "@heroicons/react/24/solid"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -7,6 +8,7 @@ import Header from "~core/shared/Header"
 import Layout from "~core/shared/Layout"
 import Section from "~core/shared/Section"
 import type { AppDispatch } from "~core/store"
+import Stat from "./components/Stat"
 
 export default function DashboardView() {
 	const dispatch: AppDispatch = useDispatch()
@@ -26,15 +28,15 @@ export default function DashboardView() {
 	return (
 		<Layout>
 			<Section>
-				<Header text={"PII/PCI"} />
-				<div className="flex justify-around">
-					<div className="flex-col">
-						<p className="font-medium">DOM</p>
-					</div>
-					<div className="flex-col">
-						<p className="font-medium">API</p>
-					</div>
-				</div>
+				<Header text={"Identified PII & PCI"} />
+				<dl className="mt-5 grid grid-cols-2 justify-items-center">
+					<Stat
+						Icon={CodeBracketSquareIcon}
+						title={"DOM"}
+						value={5}
+					/>
+					<Stat Icon={CloudIcon} title={"API"} value={5} />
+				</dl>
 			</Section>
 			<Section>
 				{!isOn ? (
