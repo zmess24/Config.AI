@@ -1,9 +1,10 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import Layout from "~core/components/Layout"
 import type { RootState } from "~core/reducers"
 import { endSession, startSession } from "~core/reducers/sessionSlice"
+import Header from "~core/shared/Header"
+import Layout from "~core/shared/Layout"
 import type { AppDispatch } from "~core/store"
 
 export default function DashboardView() {
@@ -24,7 +25,7 @@ export default function DashboardView() {
 	return (
 		<Layout>
 			<div className="bg-slate-100 dark:bg-slate-700 p-6 rounded-md shadow-md my-4">
-				<div className="font-large">PII/PCI</div>
+				<Header text={"PII/PCI"} />
 				<div className="flex justify-around">
 					<div className="flex-col">
 						<p className="font-medium">DOM</p>

@@ -1,5 +1,5 @@
-import Layout from "~core/components/Layout"
-import ProviderForm from "~core/components/ProviderForm"
+import Layout from "~core/shared/Layout"
+import ProviderForm from "~core/shared/ProviderForm"
 
 export default function ProviderView() {
 	return (

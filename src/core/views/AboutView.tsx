@@ -1,4 +1,4 @@
-import Layout from "~core/components/Layout"
+import Layout from "~core/shared/Layout"
 
 export default function AboutView() {
 	return (

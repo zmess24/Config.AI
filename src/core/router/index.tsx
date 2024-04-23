@@ -2,7 +2,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import AboutView from "~core/views/AboutView"
 import DashboardView from "~core/views/DashboardView"
 import ProviderView from "~core/views/ProviderView"
-import SettingsView from "~core/views/SettingsView"
+import SettingsView from "~core/views/SetttingsView"
 
 export default function Router() {
 	return (
