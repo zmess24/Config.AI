@@ -1,19 +1,14 @@
 import type { PlasmoCSConfig } from "plasmo"
+import { log } from "~core/console"
+import { persistor, store } from "~core/store"
 
-// import { modelAuthenticate, modelIdentifyPii } from "~core/actions"
-// import { store } from "~core/store"
-
-function log(text: string) {
-	const LOG_PREFIX = "[Config.AI]"
-	console.log(`%c ${LOG_PREFIX} ${text}`, `color: #000000; font-weight: bold`)
-}
-
-log("Loaded")
-
-// store.subscribe(() => {
-// 	const modelState = store.getState().models
-// 	console.log(modelState)
-// })
+persistor.subscribe(() => {
+	const modelState = store.getState().models
+	console.log("MODEL STATE", modelState)
+	log(
+		`Loaded. ${modelState.provider ? `Connected to ${modelState.provider}` : `Disconnected`}`
+	)
+})
 
 function getAllTextNodes() {
 	const allTextNodes = []
