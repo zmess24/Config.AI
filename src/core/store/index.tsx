@@ -45,6 +45,7 @@ const chromeStorageMiddleware = (store) => (next) => (action) => {
 
 const stateSyncMiddleware = (store) => (next) => (action) => {
 	const result = next(action)
+	console.log(result.type)
 	switch (result.type) {
 		case "models/modelAuthenticate/fulfilled":
 			console.log(result.payload.provider)
@@ -56,6 +57,16 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 		case "models/disconnectProvider":
 			sendToBackground({
 				name: "providerDisconnected"
+			})
+			break
+		case "session/startSession":
+			sendToBackground({
+				name: result.type
+			})
+			break
+		case "session/endSession":
+			sendToBackground({
+				name: result.type
 			})
 			break
 		default:

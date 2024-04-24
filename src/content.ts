@@ -39,6 +39,12 @@ async function main() {
 			case "providerDisconnected":
 				log(`Disconnected from Provider`, "#850101")
 				break
+			case "startSession":
+				log(`Starting Session`, "#228B22")
+				break
+			case "endSession":
+				log(`Ending Session`, "#850101")
+				break
 			default:
 				break
 		}
