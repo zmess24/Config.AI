@@ -30,6 +30,19 @@ export type AppThunk<ReturnType = void> = ThunkAction<
 >
 
 /**
+|--------------------------------------------------
+| Middlewares
+|--------------------------------------------------
+*/
+
+const chromeStorageMiddleware = (store) => (next) => (action) => {
+	const result = next(action)
+	const state = store.getState()
+	chrome.storage.local.set({ reduxState: state })
+	return result
+}
+
+/**
  |--------------------------------------------------
 | Configure Store
 |--------------------------------------------------
@@ -50,7 +63,7 @@ export const store = configureStore({
 					RESYNC
 				]
 			}
-		})
+		}).concat(chromeStorageMiddleware)
 })
 export const persistor = persistStore(store)
 

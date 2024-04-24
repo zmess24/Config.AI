@@ -2,7 +2,7 @@ function Stat({ value, Icon, title }) {
 	return (
 		<div
 			key={title}
-			className="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow w-10/12">
+			className="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow w-11/12">
 			<dt>
 				<div className="absolute rounded-md bg-indigo-500 p-2">
 					<Icon className="h-6 w-6 text-white" aria-hidden="true" />
