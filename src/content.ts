@@ -31,6 +31,9 @@ export const config: PlasmoCSConfig = {
 
 async function main() {
 	log("Content Script Loaded.")
+	let { isOn, provider } = await sendToBackground({ name: "initState" })
+	log(`Provider: ${provider}`, "#3f51b5")
+	log(`Session: ${isOn}`, "#3f51b5")
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		switch (message.name) {
 			case "providerConnected":
@@ -50,14 +53,17 @@ async function main() {
 		}
 	})
 
-	// const resp = await sendToBackground({
-	// 	name: "ping",
-	// 	body: {
-	// 		id: 123
-	// 	}
-	// })
+	if (currentState.isOn) {
+		let pageText =
+			"first nameRogerlast nameMessingeremail addresszmessinger@quantummetric.compasswordsend reset emailWishlist"
 
-	// log(JSON.stringify(resp))
+		const resp = await sendToBackground({
+			name: "pii/identify",
+			body: { pageText }
+		})
+
+		log(JSON.stringify(resp))
+	}
 }
 
 main()

@@ -14,6 +14,9 @@ dependencies:
   '@langchain/anthropic':
     specifier: ^0.1.14
     version: 0.1.14
+  '@langchain/core':
+    specifier: ^0.1.60
+    version: 0.1.60
   '@langchain/google-genai':
     specifier: ^0.0.11
     version: 0.0.11
@@ -38,6 +41,9 @@ dependencies:
   plasmo:
     specifier: 0.85.2
     version: 0.85.2(postcss@8.4.33)(react-dom@18.2.0)(react@18.2.0)
+  prompts:
+    specifier: link:@langchain/core/prompts
+    version: link:@langchain/core/prompts
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -605,7 +611,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@anthropic-ai/sdk': 0.20.5
-      '@langchain/core': 0.1.58
+      '@langchain/core': 0.1.60
       fast-xml-parser: 4.3.6
       zod: 3.22.4
       zod-to-json-schema: 3.22.5(zod@3.22.4)
@@ -892,7 +898,7 @@ packages:
       ws:
         optional: true
     dependencies:
-      '@langchain/core': 0.1.58
+      '@langchain/core': 0.1.60
       '@langchain/openai': 0.0.28
       expr-eval: 2.0.2
       flat: 5.0.2
@@ -904,8 +910,8 @@ packages:
       - encoding
     dev: false
 
-  /@langchain/core@0.1.58:
-    resolution: {integrity: sha512-a3b2wQbseLLnoRfQY3W6cnbSreHlPfrCoi41kznzzXTgToPK7cSeCn1wOK4CmLdWu9HCk8cm3x5yM5FXPNEP+Q==}
+  /@langchain/core@0.1.60:
+    resolution: {integrity: sha512-3EJW4ir0tFe17AakpXCgO9flSoDjFELpSQs2w/CMZ5FBlHYxo3ODgVQAZvlHy97khEVgcnvlL3EDhPE7IdNibA==}
     engines: {node: '>=18'}
     dependencies:
       ansi-styles: 5.2.0
@@ -927,14 +933,14 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@google/generative-ai': 0.1.3
-      '@langchain/core': 0.1.58
+      '@langchain/core': 0.1.60
     dev: false
 
   /@langchain/openai@0.0.28:
     resolution: {integrity: sha512-2s1RA3/eAnz4ahdzsMPBna9hfAqpFNlWdHiPxVGZ5yrhXsbLWWoPcF+22LCk9t0HJKtazi2GCIWc0HVXH9Abig==}
     engines: {node: '>=18'}
     dependencies:
-      '@langchain/core': 0.1.58
+      '@langchain/core': 0.1.60
       js-tiktoken: 1.0.11
       openai: 4.36.0
       zod: 3.22.4
@@ -4977,7 +4983,7 @@ packages:
     dependencies:
       '@anthropic-ai/sdk': 0.9.1
       '@langchain/community': 0.0.49
-      '@langchain/core': 0.1.58
+      '@langchain/core': 0.1.60
       '@langchain/openai': 0.0.28
       binary-extensions: 2.3.0
       js-tiktoken: 1.0.11

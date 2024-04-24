@@ -50,13 +50,13 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 		case "models/modelAuthenticate/fulfilled":
 			console.log(result.payload.provider)
 			sendToBackground({
-				name: "providerConnected",
+				name: "provider/connected",
 				body: result.payload.provider
 			})
 			break
 		case "models/disconnectProvider":
 			sendToBackground({
-				name: "providerDisconnected"
+				name: "provider/disconnected"
 			})
 			break
 		case "session/startSession":
