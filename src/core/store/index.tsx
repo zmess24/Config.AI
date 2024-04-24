@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 import type { Action, ThunkAction } from "@reduxjs/toolkit"
+import { sendToBackground } from "@plasmohq/messaging"
 import {
 	FLUSH,
 	PAUSE,
@@ -42,6 +43,28 @@ const chromeStorageMiddleware = (store) => (next) => (action) => {
 	return result
 }
 
+const stateSyncMiddleware = (store) => (next) => (action) => {
+	const result = next(action)
+	switch (result.type) {
+		case "models/modelAuthenticate/fulfilled":
+			console.log(result.payload.provider)
+			sendToBackground({
+				name: "providerConnected",
+				body: result.payload.provider
+			})
+			break
+		case "models/disconnectProvider":
+			sendToBackground({
+				name: "providerDisconnected"
+			})
+			break
+		default:
+			break
+	}
+
+	return result
+}
+
 /**
  |--------------------------------------------------
 | Configure Store
@@ -63,8 +86,11 @@ export const store = configureStore({
 					RESYNC
 				]
 			}
-		}).concat(chromeStorageMiddleware)
+		})
+			.concat(chromeStorageMiddleware)
+			.concat(stateSyncMiddleware)
 })
+
 export const persistor = persistStore(store)
 
 // This is what makes Redux sync properly with multiple pages

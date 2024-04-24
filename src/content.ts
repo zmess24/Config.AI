@@ -1,7 +1,7 @@
 // import { log } from "console"
 import type { PlasmoCSConfig } from "plasmo"
-import { useEffect } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
+import { useMessage } from "@plasmohq/messaging/hook"
 
 /**
 |--------------------------------------------------
@@ -9,9 +9,9 @@ import { sendToBackground } from "@plasmohq/messaging"
 |--------------------------------------------------
 */
 
-export function log(text: string) {
+export function log(text: string, color: string = "#000000") {
 	const LOG_PREFIX = "[Config.AI]"
-	console.log(`%c ${LOG_PREFIX} ${text}`, `color: #000000; font-weight: bold`)
+	console.log(`${LOG_PREFIX} %c${text}`, `color: ${color}; font-weight: bold`)
 }
 
 /**
@@ -30,15 +30,28 @@ export const config: PlasmoCSConfig = {
 */
 
 async function main() {
-	log("Content Script loaded.")
-	const resp = await sendToBackground({
-		name: "ping",
-		body: {
-			id: 123
+	log("Content Script Loaded.")
+	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+		switch (message.name) {
+			case "providerConnected":
+				log(`Connected to Provider: ${message.body}`, "#228B22")
+				break
+			case "providerDisconnected":
+				log(`Disconnected from Provider`, "#850101")
+				break
+			default:
+				break
 		}
 	})
 
-	log(JSON.stringify(resp))
+	// const resp = await sendToBackground({
+	// 	name: "ping",
+	// 	body: {
+	// 		id: 123
+	// 	}
+	// })
+
+	// log(JSON.stringify(resp))
 }
 
 main()
