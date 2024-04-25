@@ -8,10 +8,28 @@ import { useMessage } from "@plasmohq/messaging/hook"
 | Console Logs
 |--------------------------------------------------
 */
+const LOG_PREFIX = "[Config.AI]"
 
 export function log(text: string, color: string = "#000000") {
-	const LOG_PREFIX = "[Config.AI]"
 	console.log(`${LOG_PREFIX} %c${text}`, `color: ${color}; font-weight: bold`)
+}
+
+function table(piiElements) {
+	const RATING_COLORS = {
+		none: "#0CCE6A",
+		low: "#FFD700",
+		medium: "#FFA500",
+		high: "#FF4E42"
+	}
+
+	// Log to console
+	console.groupCollapsed(
+		`${LOG_PREFIX}:  PII/PCI: %c${piiElements.length} Elements Found`,
+		`color: #FF4E42`
+	)
+	console.log("Page PII Found:")
+	console.table(piiElements)
+	console.groupEnd()
 }
 
 /**
@@ -60,16 +78,16 @@ async function main() {
 		let pageText =
 			"first nameRogerlast nameMessingeremail addresszmessinger@quantummetric.compasswordsend reset emailWishlist"
 
-		log(
-			`Identifying PII for ${window.location.origin + window.location.pathname}`,
-			"#228B22"
-		)
+		let pagePath = window.location.origin + window.location.pathname
+
+		log(`Identifying PII for ${pagePath}`, "#228B22")
+
 		const resp = await sendToBackground({
 			name: "pii/identify",
 			body: { pageText }
 		})
 
-		log(JSON.stringify(resp))
+		table(resp.result.entries)
 	}
 }
 

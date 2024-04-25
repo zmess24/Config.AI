@@ -2,7 +2,7 @@ import { JsonOutputFunctionsParser } from "langchain/output_parsers"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 import models from "~core/llms/lib"
 import { piiExtractorSchema } from "~core/llms/parsers"
-import { generatePrompt, identifyPiiPrompt } from "~core/llms/prompts"
+import { identifyPiiPrompt } from "~core/llms/prompts"
 
 let modelName = "gpt-4"
 
