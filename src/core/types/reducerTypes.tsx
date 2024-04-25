@@ -21,9 +21,15 @@ interface ApiItemTypes {
 	value: string
 }
 
+interface RecordedPagesType {
+	[url: string]: {
+		domItems: Array<DomItemTypes>
+		apiItems: Array<ApiItemTypes>
+	}
+}
+
 export interface SessionStateTypes {
-	domItems: Array<DomItemTypes>
-	apiItems: Array<ApiItemTypes>
+	recordedPages: RecordedPagesType
 	isOn: boolean
 }
 

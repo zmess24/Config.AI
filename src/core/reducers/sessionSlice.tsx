@@ -2,8 +2,7 @@ import { createSlice } from "@reduxjs/toolkit"
 import type { SessionStateTypes } from "~core/types"
 
 const initialState: SessionStateTypes = {
-	domItems: [],
-	apiItems: [],
+	recordedPages: {},
 	isOn: false
 }
 
@@ -16,10 +15,13 @@ const sessionSlice = createSlice({
 		},
 		endSession: (state) => {
 			state.isOn = false
+		},
+		syncSession: (state, action) => {
+			state.recordedPages = action.payload
 		}
 	}
 })
 
-export const { startSession, endSession } = sessionSlice.actions
+export const { startSession, endSession, syncSession } = sessionSlice.actions
 
 export default sessionSlice.reducer

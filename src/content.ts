@@ -34,6 +34,38 @@ function table(piiElements) {
 
 /**
 |--------------------------------------------------
+| LocalStorage Handler
+|--------------------------------------------------
+*/
+
+function saveDomItems(payload, url) {
+	table(payload)
+	let cache = JSON.parse(window.localStorage.getItem("config.ai") || "{}")
+
+	if (cache[url]) {
+		cache[url].domItems = [...cache[url].domItems, ...payload]
+	} else {
+		cache[url] = { domItems: [...payload], apiItems: [] }
+	}
+
+	localStorage.setItem("config.ai", JSON.stringify(cache))
+}
+
+function saveApiItems(payload, url) {
+	table(payload)
+	let cache = JSON.parse(window.localStorage.getItem("config.ai") || "{}")
+
+	if (cache[url]) {
+		cache[url].apiItems = [...cache[url].apiItems, ...payload]
+	} else {
+		cache[url] = { domItems: [], apiItems: [...payload] }
+	}
+
+	localStorage.setItem("config.ai", JSON.stringify(cache))
+}
+
+/**
+|--------------------------------------------------
 | Plasmo Config
 |--------------------------------------------------
 */
@@ -41,6 +73,7 @@ function table(piiElements) {
 export const config: PlasmoCSConfig = {
 	matches: ["<all_urls>"]
 }
+
 /**
 |--------------------------------------------------
 | Main Script
@@ -69,6 +102,13 @@ async function main() {
 			case "piiStatus":
 				log(`PII Remediation Status: ${message.body.status}`, "#850101")
 				break
+			case "popupOpened":
+				log("Popup Opened")
+				let recordedPages = JSON.parse(
+					window.localStorage.getItem("config.ai")
+				)
+				sendResponse({ recordedPages })
+				break
 			default:
 				break
 		}
@@ -77,17 +117,16 @@ async function main() {
 	if (isOn) {
 		setTimeout(async () => {
 			let pageText = document.querySelector("body").innerText
-			// console.log(pageText)
 			let pagePath = window.location.origin + window.location.pathname
 
 			log(`Identifying PII for ${pagePath}`, "#228B22")
 
-			const resp = await sendToBackground({
+			const { result } = await sendToBackground({
 				name: "pii/identify",
 				body: { pageText }
 			})
 
-			table(resp.result.entries)
+			saveDomItems(result.domItems, pagePath)
 		}, 3000)
 	}
 }

@@ -1,12 +1,5 @@
-import {
-	ArrowDownCircleIcon,
-	CloudIcon,
-	CodeBracketSquareIcon,
-	TrashIcon
-} from "@heroicons/react/24/solid"
-import { useEffect } from "react"
+import { CloudIcon, CodeBracketSquareIcon } from "@heroicons/react/24/solid"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
 import type { RootState } from "~core/reducers"
 import { endSession, startSession } from "~core/reducers/sessionSlice"
 import Header from "~core/shared/Header"
@@ -17,10 +10,7 @@ import Stat from "./components/Stat"
 
 export default function DashboardView() {
 	const dispatch: AppDispatch = useDispatch()
-	const { domItems, apiItems } = useSelector(
-		(state: RootState) => state.session
-	)
-	console.log(domItems)
+	const { recordedPages } = useSelector((state: RootState) => state.session)
 	const isOn = useSelector((state: RootState) => state.session.isOn)
 
 	const handleSessionStart = (e) => {
@@ -33,6 +23,14 @@ export default function DashboardView() {
 		dispatch(endSession())
 	}
 
+	let domItemCount = 0
+	let apiItemCount = 0
+
+	for (let url in recordedPages) {
+		domItemCount += recordedPages[url].domItems.length
+		apiItemCount += recordedPages[url].apiItems.length
+	}
+
 	return (
 		<Layout>
 			<Section>
@@ -42,38 +40,14 @@ export default function DashboardView() {
 					<Stat
 						Icon={CodeBracketSquareIcon}
 						title={"DOM"}
-						value={domItems.length}
+						value={domItemCount}
 					/>
-					<Stat
-						Icon={CloudIcon}
-						title={"API"}
-						value={apiItems.length}
-					/>
+					<Stat Icon={CloudIcon} title={"API"} value={apiItemCount} />
 				</dl>
 			</Section>
 
 			<Section>
 				<Header text={"Session Options"} />
-				{/* <div className="flex flex-row justify-between mb-3">
-					<button
-						type="button"
-						className="w-full mx-1 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-						<ArrowDownCircleIcon
-							className="-ml-0.5 h-5 w-5"
-							aria-hidden="true"
-						/>
-						Download
-					</button>
-					<button
-						type="button"
-						className="w-full mx-1 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-						<TrashIcon
-							className="-ml-0.5 h-5 w-5"
-							aria-hidden="true"
-						/>
-						Clear
-					</button>
-				</div> */}
 				{!isOn ? (
 					<button
 						onClick={handleSessionStart}
