@@ -37,10 +37,12 @@ export default function DashboardView() {
 
 	let domItemCount = 0
 	let apiItemCount = 0
+	let pageCount = 0
 
 	for (let url in recordedPages) {
 		domItemCount += recordedPages[url].domItems.length
 		apiItemCount += recordedPages[url].apiItems.length
+		pageCount++
 	}
 
 	return (
@@ -51,7 +53,9 @@ export default function DashboardView() {
 					OptionalIcon={NoSymbolIcon}
 					iconClickHandler={handleResetSession}
 				/>
-				{/* <Stat Icon={CloudIcon} title={"Recorded Pages"} value={5} /> */}
+				<p className="text-center">
+					Pages Visited: <strong>{pageCount}</strong>
+				</p>
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
 					<Stat
 						Icon={CodeBracketSquareIcon}
