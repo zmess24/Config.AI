@@ -1,4 +1,9 @@
-import { CloudIcon, CodeBracketSquareIcon } from "@heroicons/react/24/solid"
+import {
+	ArrowDownCircleIcon,
+	CloudIcon,
+	CodeBracketSquareIcon,
+	TrashIcon
+} from "@heroicons/react/24/solid"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -12,7 +17,9 @@ import Stat from "./components/Stat"
 
 export default function DashboardView() {
 	const dispatch: AppDispatch = useDispatch()
-	const provider = useSelector((state: RootState) => state.models.provider)
+	const { domItems, apiItems } = useSelector(
+		(state: RootState) => state.session
+	)
 	const isOn = useSelector((state: RootState) => state.session.isOn)
 
 	const handleSessionStart = (e) => {
@@ -29,16 +36,43 @@ export default function DashboardView() {
 		<Layout>
 			<Section>
 				<Header text={"Identified PII & PCI"} />
+				{/* <Stat Icon={CloudIcon} title={"Recorded Pages"} value={5} /> */}
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
 					<Stat
 						Icon={CodeBracketSquareIcon}
 						title={"DOM"}
-						value={5}
+						value={domItems.length}
 					/>
-					<Stat Icon={CloudIcon} title={"API"} value={5} />
+					<Stat
+						Icon={CloudIcon}
+						title={"API"}
+						value={domItems.length}
+					/>
 				</dl>
 			</Section>
+
 			<Section>
+				<Header text={"Session Options"} />
+				{/* <div className="flex flex-row justify-between mb-3">
+					<button
+						type="button"
+						className="w-full mx-1 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+						<ArrowDownCircleIcon
+							className="-ml-0.5 h-5 w-5"
+							aria-hidden="true"
+						/>
+						Download
+					</button>
+					<button
+						type="button"
+						className="w-full mx-1 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+						<TrashIcon
+							className="-ml-0.5 h-5 w-5"
+							aria-hidden="true"
+						/>
+						Clear
+					</button>
+				</div> */}
 				{!isOn ? (
 					<button
 						onClick={handleSessionStart}

@@ -2,8 +2,8 @@ import { createSlice } from "@reduxjs/toolkit"
 import type { SessionStateTypes } from "~core/types"
 
 const initialState: SessionStateTypes = {
-	domItems: null,
-	apiItems: null,
+	domItems: [],
+	apiItems: [],
 	isOn: false
 }
 

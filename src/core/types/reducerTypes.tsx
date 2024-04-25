@@ -7,9 +7,23 @@ export interface ModelStateTypes {
 	response: object | null
 }
 
+interface DomItemTypes {
+	type: number
+	typeOfInformation: string
+	confidence: string
+	value: string
+}
+
+interface ApiItemTypes {
+	type: number
+	typeOfInformation: string
+	confidence: string
+	value: string
+}
+
 export interface SessionStateTypes {
-	domItems: null | object
-	apiItems: null | object
+	domItems: Array<DomItemTypes>
+	apiItems: Array<ApiItemTypes>
 	isOn: boolean
 }
 
