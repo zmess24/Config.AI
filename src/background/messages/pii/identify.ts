@@ -2,7 +2,7 @@ import { JsonOutputFunctionsParser } from "langchain/output_parsers"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 import models from "~core/llms/lib"
 import { piiExtractorSchema } from "~core/llms/parsers"
-import { identifyPiiPrompt } from "~core/llms/prompts"
+import { generatePrompt, identifyPiiPrompt } from "~core/llms/prompts"
 
 let modelName = "gpt-4"
 
@@ -13,6 +13,7 @@ const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 		let { reduxState } = await chrome.storage.local.get("reduxState")
 		const { apiKey, provider } = reduxState.models
 		// Find and Instantiate the model
+
 		let model = models.find((model) => model.provider === provider).model
 		console.log(model)
 		model = new model({ apiKey, model: modelName })

@@ -32,8 +32,8 @@ export const config: PlasmoCSConfig = {
 async function main() {
 	log("Content Script Loaded.")
 	let { isOn, provider } = await sendToBackground({ name: "initState" })
-	log(`Provider: ${provider}`, "#3f51b5")
-	log(`Session: ${isOn}`, "#3f51b5")
+	log(`Provider: ${provider} | Session: ${isOn}`, "#3f51b5")
+
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		switch (message.name) {
 			case "providerConnected":
@@ -48,15 +48,22 @@ async function main() {
 			case "endSession":
 				log(`Ending Session`, "#850101")
 				break
+			case "piiStatus":
+				log(`PII Remediation Status: ${message.body.status}`, "#850101")
+				break
 			default:
 				break
 		}
 	})
 
-	if (currentState.isOn) {
+	if (isOn) {
 		let pageText =
 			"first nameRogerlast nameMessingeremail addresszmessinger@quantummetric.compasswordsend reset emailWishlist"
 
+		log(
+			`Identifying PII for ${window.location.origin + window.location.pathname}`,
+			"#228B22"
+		)
 		const resp = await sendToBackground({
 			name: "pii/identify",
 			body: { pageText }
@@ -67,74 +74,3 @@ async function main() {
 }
 
 main()
-
-function bfs(node) {
-	const queue = [node]
-	const results = []
-	const excludeList = [
-		"P",
-		"LABEL",
-		"BUTTON",
-		"H1",
-		"H2",
-		"H3",
-		"H4",
-		"H5",
-		"H6",
-		"STRONG",
-		"A"
-	]
-	while (queue.length > 0) {
-		const current = queue.shift()
-
-		if (current.children.length > 0) {
-			for (let i = 0; i < current.children.length; i++) {
-				if (!excludeList.includes(current.children[i].tagName)) {
-					queue.push(current.children[i])
-				}
-			}
-		} else {
-			if (current.textContent) {
-				results.push(current.textContent)
-			}
-		}
-	}
-
-	return results
-}
-
-bfs(document.body)
-
-// function findPII(node, piiData, path = "") {
-// 	let excludeTags = ["SCRIPT", "STYLE", "IFRAME", "CANVAS", "IMG"]
-// 	if (
-// 		node.children &&
-// 		node.children.length === 0 &&
-// 		node.textContent &&
-// 		!excludeTags.includes(node.tagName)
-// 	) {
-// 		// Text node
-// 		const text = node.textContent
-// 		piiData.forEach(({ value }) => {
-// 			const matches = text.includes(value)
-// 			if (matches) {
-// 				console.log(
-// 					`Found PII at ${path} > ${node.tagName} for ${value}`
-// 				)
-// 			}
-// 		})
-// 	} else {
-// 		// let parsedNode = createNodeString(node);
-// 		// path.push(parsedNode);
-// 		const newPath = path + " > " + node.tagName
-// 		node.childNodes.forEach((child) => findPII(child, piiData, newPath))
-// 	}
-// }
-
-// // let pageText = document.querySelector("body").textContent
-// // console.log("PAGE TEXT", pageText)
-
-// export const config: PlasmoCSConfig = {
-// 	matches: ["<all_urls>"],
-// 	world: "MAIN"
-// }
