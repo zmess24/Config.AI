@@ -13,9 +13,8 @@ const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 		let { reduxState } = await chrome.storage.local.get("reduxState")
 		const { apiKey, provider } = reduxState.models
 		// Find and Instantiate the model
-
+		console.log("ORIGINAL STATE", reduxState)
 		let model = models.find((model) => model.provider === provider).model
-		console.log(model)
 		model = new model({ apiKey, model: modelName })
 
 		// Load Prompt & Parser
@@ -34,6 +33,13 @@ const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 			.pipe(parser)
 
 		const result = await runnable.invoke(prompt)
+
+		result.entries.forEach((entry) => {
+			reduxState.session.domItems.push(entry)
+		})
+		console.log("UPDATED STATE", reduxState)
+		chrome.storage.local.set({ reduxState })
+
 		res.send({ result })
 	} catch (err) {
 		console.log(err)

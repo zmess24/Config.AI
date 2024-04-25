@@ -45,7 +45,6 @@ const chromeStorageMiddleware = (store) => (next) => (action) => {
 
 const stateSyncMiddleware = (store) => (next) => (action) => {
 	const result = next(action)
-	console.log(result.type)
 	switch (result.type) {
 		case "models/modelAuthenticate/fulfilled":
 			console.log(result.payload.provider)

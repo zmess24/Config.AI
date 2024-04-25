@@ -20,6 +20,7 @@ export default function DashboardView() {
 	const { domItems, apiItems } = useSelector(
 		(state: RootState) => state.session
 	)
+	console.log(domItems)
 	const isOn = useSelector((state: RootState) => state.session.isOn)
 
 	const handleSessionStart = (e) => {
@@ -46,7 +47,7 @@ export default function DashboardView() {
 					<Stat
 						Icon={CloudIcon}
 						title={"API"}
-						value={domItems.length}
+						value={apiItems.length}
 					/>
 				</dl>
 			</Section>
