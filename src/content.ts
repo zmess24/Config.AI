@@ -75,19 +75,20 @@ async function main() {
 	})
 
 	if (isOn) {
-		let pageText =
-			"first nameRogerlast nameMessingeremail addresszmessinger@quantummetric.compasswordsend reset emailWishlist"
+		setTimeout(async () => {
+			let pageText = document.querySelector("body").innerText
+			// console.log(pageText)
+			let pagePath = window.location.origin + window.location.pathname
 
-		let pagePath = window.location.origin + window.location.pathname
+			log(`Identifying PII for ${pagePath}`, "#228B22")
 
-		log(`Identifying PII for ${pagePath}`, "#228B22")
+			const resp = await sendToBackground({
+				name: "pii/identify",
+				body: { pageText }
+			})
 
-		const resp = await sendToBackground({
-			name: "pii/identify",
-			body: { pageText }
-		})
-
-		table(resp.result.entries)
+			table(resp.result.entries)
+		}, 3000)
 	}
 }
 
