@@ -18,10 +18,14 @@ const sessionSlice = createSlice({
 		},
 		syncSession: (state, action) => {
 			state.recordedPages = action.payload
+		},
+		resetSession: (state) => {
+			state.recordedPages = {}
 		}
 	}
 })
 
-export const { startSession, endSession, syncSession } = sessionSlice.actions
+export const { startSession, endSession, syncSession, resetSession } =
+	sessionSlice.actions
 
 export default sessionSlice.reducer

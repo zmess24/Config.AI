@@ -1,7 +1,15 @@
-import { CloudIcon, CodeBracketSquareIcon } from "@heroicons/react/24/solid"
+import {
+	CloudIcon,
+	CodeBracketSquareIcon,
+	NoSymbolIcon
+} from "@heroicons/react/24/solid"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "~core/reducers"
-import { endSession, startSession } from "~core/reducers/sessionSlice"
+import {
+	endSession,
+	resetSession,
+	startSession
+} from "~core/reducers/sessionSlice"
 import Header from "~core/shared/Header"
 import Layout from "~core/shared/Layout"
 import Section from "~core/shared/Section"
@@ -23,6 +31,10 @@ export default function DashboardView() {
 		dispatch(endSession())
 	}
 
+	const handleResetSession = (e) => {
+		dispatch(resetSession())
+	}
+
 	let domItemCount = 0
 	let apiItemCount = 0
 
@@ -34,7 +46,11 @@ export default function DashboardView() {
 	return (
 		<Layout>
 			<Section>
-				<Header text={"Identified PII & PCI"} />
+				<Header
+					text={"Identified PII & PCI"}
+					OptionalIcon={NoSymbolIcon}
+					iconClickHandler={handleResetSession}
+				/>
 				{/* <Stat Icon={CloudIcon} title={"Recorded Pages"} value={5} /> */}
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
 					<Stat

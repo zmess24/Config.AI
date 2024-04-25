@@ -68,6 +68,11 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 				name: result.type
 			})
 			break
+		case "session/resetSession":
+			sendToBackground({
+				name: result.type
+			})
+			break
 		default:
 			break
 	}

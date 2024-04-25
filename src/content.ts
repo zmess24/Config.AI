@@ -99,6 +99,10 @@ async function main() {
 			case "endSession":
 				log(`Ending Session`, "#850101")
 				break
+			case "resetSession":
+				window.localStorage.removeItem("config.ai")
+				log("Resetting Session")
+				break
 			case "piiStatus":
 				log(`PII Remediation Status: ${message.body.status}`, "#850101")
 				break
