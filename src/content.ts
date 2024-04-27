@@ -118,6 +118,14 @@ async function main() {
 		}
 	})
 
+	function injectScript() {
+		const script = document.createElement("script")
+		script.src = chrome.runtime.getURL("scripts/injectRouteHandler2.js")
+		;(document.head || document.documentElement).appendChild(script)
+	}
+
+	injectScript()
+
 	if (isOn) {
 		setTimeout(async () => {
 			let pageText = document.querySelector("body").innerText

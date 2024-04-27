@@ -43,8 +43,19 @@
 		"typescript": "5.3.3"
 	},
 	"manifest": {
+		"manifest_version": 3,
 		"permissions": [
 			"activeTab"
+		],
+		"web_accessible_resources": [
+			{
+				"resources": [
+					"scripts/injectRouteHandler2.js"
+				],
+				"matches": [
+					"<all_urls>"
+				]
+			}
 		]
 	}
 }
