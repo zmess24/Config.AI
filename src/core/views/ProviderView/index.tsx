@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
 import { modelAuthenticate } from "~core/actions"
 import modelMap from "~core/llms/lib"
 import type { RootState } from "~core/reducers"
@@ -15,17 +14,18 @@ import ProviderFooter from "./components/ProviderFooter"
 
 function ProviderView() {
 	const [isOpen, setIsOpen] = useState(false)
-	const [model, setModel] = useState(modelMap[0])
 	const [apiKey, setApiKey] = useState("")
 	const models = useSelector((state: RootState) => state.models)
 	const provider = useSelector((state: RootState) => state.models.provider)
+	const [model, setModel] = useState(
+		provider ? modelMap.find((m) => m.provider === provider) : modelMap[0]
+	)
 	const dispatch: AppDispatch = useDispatch()
-	const navigate = useNavigate()
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		setApiKey("")
-		dispatch(modelAuthenticate({ apiKey }))
+		dispatch(modelAuthenticate({ apiKey, provider: model.provider }))
 	}
 
 	const handleDisconnect = (e) => {

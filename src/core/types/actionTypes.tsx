@@ -5,6 +5,7 @@ export interface ActionType {
 
 export interface ModelAuthenticteTypes {
 	apiKey: string
+	provider: string
 }
 
 export interface ModelIdentifyPiiTypes {

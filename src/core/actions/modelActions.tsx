@@ -4,6 +4,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai"
 import { ChatOpenAI } from "@langchain/openai"
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { JsonOutputFunctionsParser } from "langchain/output_parsers"
+import modelMap from "~core/llms/lib"
 import { identifyPiiPrompt } from "~core/llms/prompts"
 import type { ModelAuthenticteTypes, ModelIdentifyPiiTypes } from "~core/types"
 
@@ -58,20 +59,18 @@ const extractionFunctionSchema = {
 
 export const modelAuthenticate = createAsyncThunk(
 	"models/modelAuthenticate", // action type prefix
-	async ({ apiKey }: ModelAuthenticteTypes, { rejectWithValue }) => {
+	async (
+		{ apiKey, provider }: ModelAuthenticteTypes,
+		{ rejectWithValue }
+	) => {
 		try {
-			let llm = new ChatOpenAI({ apiKey, model: "gpt-4" })
-
-			await llm.invoke("Test connection")
-			// const llm = new ChatGoogleGenerativeAI({
-			// 	apiKey,
-			// 	modelName: "gemini-pro"
-			// })
-			// await llm.invoke("Test connection")
-			return { provider: "openai", apiKey }
+			let model = modelMap
+				.find((model) => model.provider === provider)
+				.initModel(apiKey)
+			await model.invoke("Test connection")
+			return { provider, apiKey }
 		} catch (error) {
-			console.log(error.message)
-			return rejectWithValue(error.message) // This will be the payload of the rejected action
+			return rejectWithValue(error.message)
 		}
 	}
 )

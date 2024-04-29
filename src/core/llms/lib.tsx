@@ -10,19 +10,31 @@ const modelMap = [
 		provider: "openai",
 		name: "GPT-4",
 		image: openaiLogo,
-		model: ChatOpenAI
+		initModel: function (apiKey) {
+			let model = new ChatOpenAI({ apiKey, model: "gpt-4" })
+			return model
+		}
 	},
 	{
 		provider: "anthropic",
 		name: "Claude",
 		image: anthropicLogo,
-		modul: ChatAnthropic
+		initModel: function (apiKey) {
+			let model = new ChatAnthropic({ apiKey })
+			return model
+		}
 	},
 	{
 		provider: "google",
 		name: "Gemini Pro",
 		image: googleLogo,
-		model: ChatGoogleGenerativeAI
+		initModel: function (apiKey) {
+			let model = new ChatGoogleGenerativeAI({
+				apiKey,
+				modelName: "gemini-pro"
+			})
+			return model
+		}
 	}
 ]
 
