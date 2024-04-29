@@ -54,7 +54,7 @@ export default function DashboardView() {
 					iconClickHandler={handleResetSession}
 				/>
 				<p className="text-center">
-					Pages Visited: <strong>{pageCount}</strong>
+					Unique Pages Visited: <strong>{pageCount}</strong>
 				</p>
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
 					<Stat

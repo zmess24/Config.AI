@@ -5,13 +5,12 @@ import { piiExtractorSchema } from "~core/llms/parsers"
 import { identifyPiiPrompt } from "~core/llms/prompts"
 
 let modelName = "gpt-4"
-
+// let modelName = "gemini-pro"
 const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 	try {
 		let pageText = req.body.pageText
 
 		let { reduxState } = await chrome.storage.local.get("reduxState")
-
 		const { apiKey, provider } = reduxState.models
 		// Find and Instantiate the model
 		let model = models.find((model) => model.provider === provider).model
@@ -33,10 +32,10 @@ const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 			.pipe(parser)
 
 		const result = await runnable.invoke(prompt)
-
 		res.send({ result })
 	} catch (err) {
 		console.log(err)
+		res.send({ err })
 	}
 }
 

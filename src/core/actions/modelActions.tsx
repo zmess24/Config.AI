@@ -1,5 +1,6 @@
 // src/features/users/userThunks.js
 import { HumanMessage } from "@langchain/core/messages"
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai"
 import { ChatOpenAI } from "@langchain/openai"
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { JsonOutputFunctionsParser } from "langchain/output_parsers"
@@ -59,11 +60,17 @@ export const modelAuthenticate = createAsyncThunk(
 	"models/modelAuthenticate", // action type prefix
 	async ({ apiKey }: ModelAuthenticteTypes, { rejectWithValue }) => {
 		try {
-			// console.log("API KEY", apiKey)
-			let llm = new ChatOpenAI({ apiKey })
+			let llm = new ChatOpenAI({ apiKey, model: "gpt-4" })
+
 			await llm.invoke("Test connection")
+			// const llm = new ChatGoogleGenerativeAI({
+			// 	apiKey,
+			// 	modelName: "gemini-pro"
+			// })
+			// await llm.invoke("Test connection")
 			return { provider: "openai", apiKey }
 		} catch (error) {
+			console.log(error.message)
 			return rejectWithValue(error.message) // This will be the payload of the rejected action
 		}
 	}

@@ -20,6 +20,47 @@ export const config: PlasmoCSConfig = {
 |--------------------------------------------------
 */
 
+function constructSelector(node, depth = 0, selector = "") {
+	if (node.id) {
+		return `${node.id} ${selector}`
+	} else {
+		let attribute = node.className
+		if (depth === 6) {
+			return selector
+		} else {
+			selector = `${attribute} ${selector}`
+			return constructSelector(node.parentNode, depth + 1, selector)
+		}
+	}
+}
+
+function findNodesWithPII(piiList) {
+	const textNodes = []
+	const walker = document.createTreeWalker(
+		document.body,
+		NodeFilter.SHOW_TEXT,
+		null
+	)
+
+	let node
+	while ((node = walker.nextNode())) {
+		// Check if the text content of the node contains any PII/PCI
+		piiList.forEach((data) => {
+			if (
+				node.textContent.includes(data.value) &&
+				// !data.selector &&
+				node.parentNode.nodeName !== "SCRIPT"
+			) {
+				let selector = constructSelector(node.parentNode, 0, "")
+				debugger
+				data.selector = selector
+			}
+		})
+	}
+
+	return textNodes
+}
+
 async function main() {
 	print.log("Content Script Loaded.")
 	let { isOn, provider } = await sendToBackground({ name: "initState" })
@@ -82,7 +123,9 @@ async function main() {
 						body: { pageText }
 					})
 
-					cache.saveDomItems(result.domItems, pagePath)
+					console.log(result)
+
+					// cache.saveDomItems(result.domItems, pagePath)
 				}, 3000)
 			}
 		}
@@ -102,9 +145,17 @@ async function main() {
 				body: { pageText }
 			})
 
+			findNodesWithPII(result.domItems)
 			cache.saveDomItems(result.domItems, pagePath)
 		}, 3000)
 	}
 }
 
 main()
+
+// Example usage:
+let storage = JSON.parse(window.localStorage.getItem("config.ai"))
+let pagePII = storage["https://skims.com/account"]
+let piiList = pagePII.domItems
+const nodesContainingPII = findNodesWithPII(piiList)
+console.log(nodesContainingPII) // Logs all nodes containing specified PII/PCI
