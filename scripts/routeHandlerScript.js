@@ -18,14 +18,12 @@ function injectScript(code) {
 
 // The actual JavaScript code you want to inject
 const code = `
-    console.log("Injected Script Loaded");
     (function(history){
-        console.log("History API Hooked");
         var pushState = history.pushState;
         var replaceState = history.replaceState;
 
         history.pushState = function(state) {
-            console.log('pushState called', state);
+            window.postMessage({ type: 'routeChange' }, '*');
             if (typeof history.onpushstate == "function") {
                 history.onpushstate({state: state});
             }
@@ -33,7 +31,7 @@ const code = `
         };
 
         history.replaceState = function(state) {
-            console.log('replaceState called', state);
+            window.postMessage({ type: 'routeChange' }, '*');
             if (typeof history.onreplacestate == "function") {
                 history.onreplacestate({state: state});
             }
@@ -41,7 +39,7 @@ const code = `
         };
 
         window.addEventListener('popstate', function(event) {
-            console.log('Location changed!');
+            window.postMessage({ type: 'routeChange' }, '*');
         });
     })(window.history);
 `

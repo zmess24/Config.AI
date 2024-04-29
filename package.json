@@ -50,7 +50,7 @@
 		"web_accessible_resources": [
 			{
 				"resources": [
-					"scripts/injectRouteHandler2.js"
+					"scripts/routeHandlerScript.js"
 				],
 				"matches": [
 					"<all_urls>"

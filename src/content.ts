@@ -120,9 +120,30 @@ async function main() {
 
 	function injectScript() {
 		const script = document.createElement("script")
-		script.src = chrome.runtime.getURL("scripts/injectRouteHandler2.js")
+		script.src = chrome.runtime.getURL("scripts/routeHandlerScript.js")
 		;(document.head || document.documentElement).appendChild(script)
 	}
+
+	window.addEventListener("message", (event) => {
+		if (event.source === window && event.data.type === "routeChange") {
+			if (isOn) {
+				setTimeout(async () => {
+					let pageText = document.querySelector("body").innerText
+					let pagePath =
+						window.location.origin + window.location.pathname
+
+					log(`Identifying PII for ${pagePath}`, "#228B22")
+
+					const { result } = await sendToBackground({
+						name: "pii/identify",
+						body: { pageText }
+					})
+
+					saveDomItems(result.domItems, pagePath)
+				}, 3000)
+			}
+		}
+	})
 
 	injectScript()
 
