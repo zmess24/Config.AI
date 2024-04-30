@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { modelAuthenticate } from "~core/actions"
-import modelMap from "~core/llms/lib"
+import { modelMap } from "~core/llms/lib"
 import type { RootState } from "~core/reducers"
 import { disconnectProvider } from "~core/reducers/modelSlice"
 import { endSession } from "~core/reducers/sessionSlice"

@@ -1,1 +1,2 @@
-export * from "./identifyPiiPrompt"
+export * from "./identifyPii"
+export * from "./generateSelectors"

@@ -32,7 +32,7 @@ class ConfigAi implements ConfigAiInterface {
 
 	/**
     |--------------------------------------------------
-    | Private Methods
+    | Private DOM Methods
     |--------------------------------------------------
     */
 
@@ -53,72 +53,7 @@ class ConfigAi implements ConfigAiInterface {
 		return this.#constructSelector(node.parentNode, depth + 1, selector)
 	}
 
-	#saveToCache(payload, url: string, type: string) {
-		print.table(payload)
-
-		if (this.cache[url]) {
-			this.cache[url][type] = [...this.cache[url][type], ...payload]
-		} else {
-			this.cache[url] =
-				type === "domItems"
-					? { domItems: [...payload], apiItems: [] }
-					: { domItems: [], apiItems: [...payload] }
-		}
-
-		localStorage.setItem("config.ai", JSON.stringify(this.cache))
-	}
-
-	/**
-    |--------------------------------------------------
-    | Public Methods
-    |--------------------------------------------------
-    */
-
-	clearCache() {
-		this.cache = {}
-		localStorage.removeItem("config.ai")
-	}
-
-	scanPageForPII() {
-		if (this.isOn) {
-			setTimeout(async () => {
-				let pageText = document.querySelector("body").innerText
-				let pagePath = window.location.origin + window.location.pathname
-
-				print.log(`Scanning ${pagePath}`, "#228B22")
-
-				const { result } = await sendToBackground({
-					name: "pii/identify",
-					body: { pageText }
-				})
-
-				this.findNodesWithPII(result.domItems)
-				this.#saveToCache(result.domItems, pagePath, "domItems")
-			}, 3000)
-		}
-	}
-
-	findNodesWithPII(piiList) {
-		const textNodes = []
-		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
-		let node
-
-		while ((node = walker.nextNode())) {
-			piiList.forEach((data) => {
-				if (
-					node.textContent.includes(data.value) &&
-					node.parentNode.nodeName !== "SCRIPT"
-				) {
-					let selector = this.#constructSelector(node.parentNode, 0)
-					data.selector = selector
-				}
-			})
-		}
-
-		return textNodes
-	}
-
-	pruneAndSerializeDOM(rootElement: HtmlHTMLAttributes) {
+	#pruneAndSerializeDOM(rootElement: HtmlHTMLAttributes) {
 		// Create a deep clone of the rootElement to work on
 		const clonedElement = rootElement.cloneNode(true)
 
@@ -162,6 +97,101 @@ class ConfigAi implements ConfigAiInterface {
 		const serializer = new XMLSerializer()
 		const serializedDOM = serializer.serializeToString(clonedElement)
 		return serializedDOM
+	}
+
+	/**
+    |--------------------------------------------------
+    | Private Cache Methods
+    |--------------------------------------------------
+    */
+
+	#saveToCache(payload, url: string, type: string) {
+		print.table(payload)
+
+		if (this.cache[url]) {
+			this.cache[url][type] = [...this.cache[url][type], ...payload]
+		} else {
+			this.cache[url] =
+				type === "domItems"
+					? { domItems: [...payload], apiItems: [] }
+					: { domItems: [], apiItems: [...payload] }
+		}
+
+		localStorage.setItem("config.ai", JSON.stringify(this.cache))
+	}
+
+	/**
+    |--------------------------------------------------
+    | Private Background Worker Methods
+    |--------------------------------------------------
+    */
+
+	async #identifyPII(pageText: string, pagePath: string) {
+		print.log(`Scanning ${pagePath}`, "#228B22")
+		const { result } = await sendToBackground({
+			name: "pii/identify",
+			body: { pageText }
+		})
+
+		return result.domItems
+	}
+
+	async #generateSelectors(domTree: string, domItems: Array<object>) {
+		print.log(`Refining Selectors`, "#228B22")
+		const { result } = await sendToBackground({
+			name: "pii/generate",
+			body: { domTree, domItems }
+		})
+
+		return result.domItems
+	}
+
+	/**
+    |--------------------------------------------------
+    | Public Methods
+    |--------------------------------------------------
+    */
+
+	clearCache() {
+		this.cache = {}
+		localStorage.removeItem("config.ai")
+	}
+
+	scanPageForPII() {
+		if (this.isOn) {
+			setTimeout(async () => {
+				let pageText = document.querySelector("body").innerText
+				let pagePath = window.location.origin + window.location.pathname
+				let domItems = await this.#identifyPII(pageText, pagePath)
+				console.log(domItems)
+				// if (domItems.length > 0) {
+				// 	this.findNodesWithPII(domItems)
+				// 	let domTree = this.#pruneAndSerializeDOM(document.body)
+				// 	domItems = await this.#generateSelectors(domTree, domItems)
+				// 	this.#saveToCache(domItems, pagePath, "domItems")
+				// }
+			}, 3000)
+		}
+	}
+
+	findNodesWithPII(piiList) {
+		const textNodes = []
+		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
+		let node
+
+		while ((node = walker.nextNode())) {
+			piiList.forEach((data) => {
+				if (
+					node.textContent.includes(data.value) &&
+					node.parentNode.nodeName !== "SCRIPT"
+				) {
+					let selector = this.#constructSelector(node.parentNode, 0)
+					data.selector = selector
+				}
+			})
+		}
+
+		return textNodes
 	}
 }
 

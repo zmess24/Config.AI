@@ -1,10 +1,10 @@
-export const piiExtractorSchema = {
-	name: "piiExtractor",
+export const generateSelectorsSchema = {
+	name: "generateSelectors",
 	description: "Extracts PII and PCI from text data",
 	parameters: {
 		type: "object", // Ensuring the top-level schema is an object
 		properties: {
-			entries: {
+			domItems: {
 				// Encapsulating the array within an object property
 				type: "array",
 				items: {

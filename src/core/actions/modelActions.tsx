@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import modelMap from "~core/llms/lib"
+import { modelMap } from "~core/llms/lib"
 import type { ModelAuthenticteTypes, ModelIdentifyPiiTypes } from "~core/types"
 
 export const modelAuthenticate = createAsyncThunk(

@@ -1,5 +1,5 @@
-export const piiExtractorSchema = {
-	name: "piiExtractor",
+export const identifyPiiSchema = {
+	name: "identifyPii",
 	description: "Extracts PII and PCI from text data",
 	parameters: {
 		type: "object", // Ensuring the top-level schema is an object
