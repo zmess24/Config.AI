@@ -158,7 +158,6 @@ class ConfigAi implements ConfigAiInterface {
 
 	#saveToCache(payload, url: string, type: string) {
 		print.table(payload)
-
 		if (this.cache[url]) {
 			this.cache[url][type] = [...this.cache[url][type], ...payload]
 		} else {
@@ -228,6 +227,7 @@ class ConfigAi implements ConfigAiInterface {
 		} else {
 			setTimeout(async () => {
 				let domItems = this.cache[pagePath].domItems
+				print.table(domItems)
 				this.#highlightNodesWithPII(domItems)
 			}, 3000)
 		}

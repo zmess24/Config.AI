@@ -61,15 +61,15 @@ async function invokeChain(model, name, promptArguments) {
 		const { prompt, schema } = chainMap[name]
 		// Load Prompt & Parser
 		let modelPrompt = await prompt.format({ ...promptArguments })
-		console.log(prompt, schema, modelPrompt)
+
 		const runnable = model
 			.bind({ functions: [schema], function_call: { name } })
 			.pipe(parser)
-
+		console.log(modelPrompt)
 		const result = await runnable.invoke(modelPrompt)
 		return result
 	} catch (err) {
-		console.log(err.message)
+		console.log(err)
 		return err.message
 	}
 }
