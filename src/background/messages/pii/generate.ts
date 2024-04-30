@@ -7,10 +7,11 @@ const generateSelectors: PlasmoMessaging.MessageHandler = async (req, res) => {
 	const { apiKey, provider } = reduxState.models
 	// Find and Instantiate the model
 	let model = getModel(provider, apiKey)
+
 	// Invoke the model
 	let result = await invokeChain(model, "generateSelectors", {
 		domTree,
-		domItems
+		domItems: JSON.stringify(domItems)
 	})
 	res.send({ result })
 }

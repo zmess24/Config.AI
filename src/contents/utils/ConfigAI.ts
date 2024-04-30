@@ -53,7 +53,10 @@ class ConfigAi implements ConfigAiInterface {
 		return this.#constructSelector(node.parentNode, depth + 1, selector)
 	}
 
-	#pruneAndSerializeDOM(rootElement: HtmlHTMLAttributes) {
+	#pruneAndSerializeDOM(
+		rootElement: HtmlHTMLAttributes,
+		keepTextKeywords: Array<string>
+	) {
 		// Create a deep clone of the rootElement to work on
 		const clonedElement = rootElement.cloneNode(true)
 
@@ -70,8 +73,10 @@ class ConfigAi implements ConfigAiInterface {
 			element.parentNode.removeChild(element)
 		)
 
+		const allElements = clonedElement.querySelectorAll("*")
+
 		// Remove non-essential attributes from all elements
-		clonedElement.querySelectorAll("*").forEach((el: HTMLElement) => {
+		allElements.forEach((el: HTMLElement) => {
 			// Get an array of attribute names to consider for removal
 			const attributes = Array.from(el.attributes)
 			attributes.forEach((attr: Attr) => {
@@ -82,6 +87,21 @@ class ConfigAi implements ConfigAiInterface {
 					!attr.name.startsWith("data-")
 				) {
 					el.removeAttribute(attr.name)
+				}
+			})
+		})
+
+		// Remove text from elements that do not contain specified keywords
+		allElements.forEach((el: HTMLElement) => {
+			Array.from(el.childNodes).forEach((child) => {
+				if (child.nodeType === Node.TEXT_NODE) {
+					const textContent = child.nodeValue.trim()
+					const containsKeyword = keepTextKeywords.some(
+						(keyword: any) => textContent.includes(keyword.value)
+					)
+					if (!containsKeyword) {
+						child.nodeValue = "" // Clear the text node value
+					}
 				}
 			})
 		})
@@ -117,6 +137,17 @@ class ConfigAi implements ConfigAiInterface {
 		}
 
 		return textNodes
+	}
+
+	#highlightNodesWithPII(domItems) {
+		domItems.forEach((data) => {
+			const elements = document.querySelectorAll(data.selector)
+			elements.forEach((element) => {
+				element.style.transition = "all 0.5s ease-in"
+				element.style.backgroundColor = "#A5B4FC"
+				element.style.border = "2px solid #4338ca"
+			})
+		})
 	}
 
 	/**
@@ -178,17 +209,26 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	scanPageForPII() {
-		if (this.isOn) {
+		let pagePath = window.location.origin + window.location.pathname
+		if (this.isOn && !this.cache[pagePath]) {
 			setTimeout(async () => {
 				let pageText = document.querySelector("body").innerText
-				let pagePath = window.location.origin + window.location.pathname
 				let domItems = await this.#identifyPII(pageText, pagePath)
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
-					let domTree = this.#pruneAndSerializeDOM(document.body)
+					let domTree = this.#pruneAndSerializeDOM(
+						document.body,
+						domItems
+					)
 					domItems = await this.#generateSelectors(domTree, domItems)
-					console.log(domItems)
+					this.#saveToCache(domItems, pagePath, "domItems")
+					this.#highlightNodesWithPII(domItems)
 				}
+			}, 3000)
+		} else {
+			setTimeout(async () => {
+				let domItems = this.cache[pagePath].domItems
+				this.#highlightNodesWithPII(domItems)
 			}, 3000)
 		}
 	}
