@@ -47,7 +47,7 @@ export function initMessageHandlers(configAi) {
 		}
 	)
 
-	window.addEventListener("message", (event: MessageEvent) => {
+	window.addEventListener("message", (event) => {
 		if (event.source === window) {
 			switch (event.data.type) {
 				case "routeChange":

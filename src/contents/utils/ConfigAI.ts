@@ -41,14 +41,13 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#constructSelector(node, depth = 0, selector = "") {
-		// Base case: if we've reached the 6th parent or we don't have a parent node, return the accumulated selector
+		// End recursion if base cases are met
 		if (depth === 6 || !node.parentNode) return selector.trim()
-		// If the node has an ID, prepend it using the ID selector syntax and terminate the recursion
 		if (node.id) return `#${node.id} ${selector}`.trim()
 		// If the node has class names, prepend them using the class selector syntax
 		let currentSelector = node.className
 			? `.${node.className.split(" ").join(".")}`
-			: "element" // Use 'element' as a placeholder if no class
+			: node.name // Use 'element' as a placeholder if no class
 		// Add the current selector to the accumulated selector
 		selector = `${currentSelector} ${selector}`.trim()
 		return this.#constructSelector(node.parentNode, depth + 1, selector)
@@ -82,21 +81,20 @@ class ConfigAi implements ConfigAiInterface {
 
 	scanPageForPII() {
 		if (this.isOn) {
-			print.log("Scanning page for PII")
-			// setTimeout(async () => {
-			// 	let pageText = document.querySelector("body").innerText
-			// 	let pagePath = window.location.origin + window.location.pathname
+			setTimeout(async () => {
+				let pageText = document.querySelector("body").innerText
+				let pagePath = window.location.origin + window.location.pathname
 
-			// 	print.log(`Identifying PII for ${pagePath}`, "#228B22")
+				print.log(`Scanning ${pagePath}`, "#228B22")
 
-			// 	const { result } = await sendToBackground({
-			// 		name: "pii/identify",
-			// 		body: { pageText }
-			// 	})
+				const { result } = await sendToBackground({
+					name: "pii/identify",
+					body: { pageText }
+				})
 
-			// 	this.findNodesWithPII(result.domItems)
-			// 	this.#saveToCache(result.domItems, pagePath, "domItems")
-			// }, 3000)
+				this.findNodesWithPII(result.domItems)
+				this.#saveToCache(result.domItems, pagePath, "domItems")
+			}, 3000)
 		}
 	}
 
@@ -111,11 +109,7 @@ class ConfigAi implements ConfigAiInterface {
 					node.textContent.includes(data.value) &&
 					node.parentNode.nodeName !== "SCRIPT"
 				) {
-					let selector = this.#constructSelector(
-						node.parentNode,
-						0,
-						""
-					)
+					let selector = this.#constructSelector(node.parentNode, 0)
 					data.selector = selector
 				}
 			})

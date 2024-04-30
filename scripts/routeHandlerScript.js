@@ -1,4 +1,8 @@
 function injectScript(code) {
+	console.log(
+		"[Config.AI] Injecting Route Listener Script...",
+		`font-weight: bold`
+	)
 	// Create a new script element
 	const script = document.createElement("script")
 
