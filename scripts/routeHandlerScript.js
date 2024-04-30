@@ -1,6 +1,4 @@
 function injectScript(code) {
-	console.log("Injecting Script")
-
 	// Create a new script element
 	const script = document.createElement("script")
 
@@ -12,8 +10,6 @@ function injectScript(code) {
 
 	// Append the script element to the head or the documentElement
 	;(document.head || document.documentElement).appendChild(script)
-
-	console.log("Finished Injecting Script")
 }
 
 // The actual JavaScript code you want to inject
