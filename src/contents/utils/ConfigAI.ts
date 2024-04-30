@@ -99,6 +99,26 @@ class ConfigAi implements ConfigAiInterface {
 		return serializedDOM
 	}
 
+	#findNodesWithPII(piiList) {
+		const textNodes = []
+		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
+		let node
+
+		while ((node = walker.nextNode())) {
+			piiList.forEach((data) => {
+				if (
+					node.textContent.includes(data.value) &&
+					node.parentNode.nodeName !== "SCRIPT"
+				) {
+					let selector = this.#constructSelector(node.parentNode, 0)
+					data.selector = selector
+				}
+			})
+		}
+
+		return textNodes
+	}
+
 	/**
     |--------------------------------------------------
     | Private Cache Methods
@@ -163,35 +183,14 @@ class ConfigAi implements ConfigAiInterface {
 				let pageText = document.querySelector("body").innerText
 				let pagePath = window.location.origin + window.location.pathname
 				let domItems = await this.#identifyPII(pageText, pagePath)
-				console.log(domItems)
-				// if (domItems.length > 0) {
-				// 	this.findNodesWithPII(domItems)
-				// 	let domTree = this.#pruneAndSerializeDOM(document.body)
-				// 	domItems = await this.#generateSelectors(domTree, domItems)
-				// 	this.#saveToCache(domItems, pagePath, "domItems")
-				// }
+				if (domItems.length > 0) {
+					this.#findNodesWithPII(domItems)
+					let domTree = this.#pruneAndSerializeDOM(document.body)
+					domItems = await this.#generateSelectors(domTree, domItems)
+					console.log(domItems)
+				}
 			}, 3000)
 		}
-	}
-
-	findNodesWithPII(piiList) {
-		const textNodes = []
-		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
-		let node
-
-		while ((node = walker.nextNode())) {
-			piiList.forEach((data) => {
-				if (
-					node.textContent.includes(data.value) &&
-					node.parentNode.nodeName !== "SCRIPT"
-				) {
-					let selector = this.#constructSelector(node.parentNode, 0)
-					data.selector = selector
-				}
-			})
-		}
-
-		return textNodes
 	}
 }
 
