@@ -7,13 +7,11 @@ const identifyPii: PlasmoMessaging.MessageHandler = async (req, res) => {
 	const { apiKey, provider } = reduxState.models
 	// Find and Instantiate the model
 	let model = getModel(provider, apiKey)
-
-	// Invoke the model
-	let result = await model.invokeChain(model, "identifyPii", {
+	let result = await invokeChain(model, "identifyPii", {
 		pageText,
 		rules: []
 	})
-	console.log(result)
+
 	res.send({ result })
 }
 

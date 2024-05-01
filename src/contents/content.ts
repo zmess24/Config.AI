@@ -26,13 +26,14 @@ async function main() {
 	print.log("Content Script Loaded.")
 	// Fetch the current state of the extension
 	let { isOn, provider } = await sendToBackground({ name: "initState" })
+	// print.log(`Provider: ${provider}, isOn: ${isOn}`, "#228B22")
 	const configAi = new ConfigAi(provider, isOn)
 	// Inject the Route Handler Script
 	injectRouteHandlerScript()
 	// Initialize the Message Listeners
 	initMessageHandlers(configAi)
 	// Scan the page for PII
-	configAi.scanPageForPII()
+	// configAi.scanPageForPII()
 }
 
 main()
