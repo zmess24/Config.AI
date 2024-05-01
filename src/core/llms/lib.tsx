@@ -24,6 +24,24 @@ const modelMap = [
 		initModel: function (apiKey) {
 			let model = new ChatOpenAI({ apiKey, model: "gpt-4" })
 			return model
+		},
+		invokeChain: async function (model, name, promptArguments) {
+			try {
+				const parser = new JsonOutputFunctionsParser()
+				const { prompt, schema } = chainMap[name]
+				// Load Prompt & Parser
+				let modelPrompt = await prompt.format({ ...promptArguments })
+
+				const runnable = model
+					.bind({ functions: [schema], function_call: { name } })
+					.pipe(parser)
+				console.log(modelPrompt)
+				const result = await runnable.invoke(modelPrompt)
+				return result
+			} catch (err) {
+				console.log(err)
+				return err.message
+			}
 		}
 	},
 	{
@@ -33,6 +51,24 @@ const modelMap = [
 		initModel: function (apiKey) {
 			let model = new ChatAnthropic({ apiKey })
 			return model
+		},
+		invokeChain: async function (model, name, promptArguments) {
+			try {
+				const parser = new JsonOutputFunctionsParser()
+				const { prompt, schema } = chainMap[name]
+				// Load Prompt & Parser
+				let modelPrompt = await prompt.format({ ...promptArguments })
+
+				const runnable = model
+					.bind({ functions: [schema], function_call: { name } })
+					.pipe(parser)
+				console.log(modelPrompt)
+				const result = await runnable.invoke(modelPrompt)
+				return result
+			} catch (err) {
+				console.log(err)
+				return err.message
+			}
 		}
 	},
 	{
@@ -45,6 +81,24 @@ const modelMap = [
 				modelName: "gemini-pro"
 			})
 			return model
+		},
+		invokeChain: async function (model, name, promptArguments) {
+			try {
+				const parser = new JsonOutputFunctionsParser()
+				const { prompt, schema } = chainMap[name]
+				// Load Prompt & Parser
+				let modelPrompt = await prompt.format({ ...promptArguments })
+
+				const runnable = model
+					.bind({ functions: [schema], function_call: { name } })
+					.pipe(parser)
+				console.log(modelPrompt)
+				const result = await runnable.invoke(modelPrompt)
+				return result
+			} catch (err) {
+				console.log(err)
+				return err.message
+			}
 		}
 	}
 ]

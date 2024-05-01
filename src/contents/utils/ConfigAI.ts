@@ -44,12 +44,31 @@ class ConfigAi implements ConfigAiInterface {
 		// End recursion if base cases are met
 		if (depth === 6 || !node.parentNode) return selector.trim()
 		if (node.id) return `#${node.id} ${selector}`.trim()
-		// If the node has class names, prepend them using the class selector syntax
-		let currentSelector = node.className
-			? `.${node.className.split(" ").join(".")}`
-			: node.name // Use 'element' as a placeholder if no class
-		// Add the current selector to the accumulated selector
+
+		let currentSelector = ""
+
+		// Use the `name` attribute if present, which is less common but quite specific
+		if (node.name) {
+			currentSelector = `[name="${node.name}"]`
+		}
+		// Use classes, if available; consider using a specific class if multiple are present
+		else if (node.className) {
+			const classes = node.className.split(" ")
+			if (classes.length > 0) {
+				currentSelector = `.${classes.join(".")}`
+			} else {
+				currentSelector = node.tagName.toLowerCase() // Fallback to tagName if no suitable class found
+			}
+		}
+		// Fallback to tagName if no other identifiers are present
+		else {
+			currentSelector = node.tagName.toLowerCase()
+		}
+
+		// Combine the current selector with the accumulated selectors
 		selector = `${currentSelector} ${selector}`.trim()
+
+		// Recurse, incrementing depth to limit recursion length
 		return this.#constructSelector(node.parentNode, depth + 1, selector)
 	}
 
@@ -213,6 +232,7 @@ class ConfigAi implements ConfigAiInterface {
 			setTimeout(async () => {
 				let pageText = document.querySelector("body").innerText
 				let domItems = await this.#identifyPII(pageText, pagePath)
+				console.log(domItems)
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
 					let domTree = this.#pruneAndSerializeDOM(
