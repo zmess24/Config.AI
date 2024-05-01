@@ -23,7 +23,7 @@ class ConfigAi implements ConfigAiInterface {
 			window.localStorage.getItem("config.ai") || "{}"
 		)
 		this.nonTextBasedSelectors =
-			"script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path, input, textarea, select, label, option"
+			"script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
 		this.inputTypes = "input, textarea, select, label, option"
 
 		print.log(
@@ -170,7 +170,6 @@ class ConfigAi implements ConfigAiInterface {
 					node.textContent.includes(data.value) &&
 					node.parentNode.nodeName !== "SCRIPT"
 				) {
-					console.log(node, node.textContent)
 					if (node.parentNode.nodeName !== "LABEL") {
 						let selector = this.#constructSelector(
 							node.parentNode,
