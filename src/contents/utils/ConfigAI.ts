@@ -13,6 +13,7 @@ class ConfigAi implements ConfigAiInterface {
 	provider: string
 	isOn: boolean
 	nonTextBasedSelectors: string
+	inputTypes: string
 	cache: object
 
 	constructor(provider: string, isOn: boolean) {
@@ -22,7 +23,8 @@ class ConfigAi implements ConfigAiInterface {
 			window.localStorage.getItem("config.ai") || "{}"
 		)
 		this.nonTextBasedSelectors =
-			"script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
+			"script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path, input, textarea, select, label, option"
+		this.inputTypes = "input, textarea, select, label, option"
 
 		print.log(
 			`Provider: ${this.provider} | Session: ${this.isOn}`,
@@ -44,9 +46,8 @@ class ConfigAi implements ConfigAiInterface {
 		// End recursion if base cases are met
 		if (depth === 6 || !node.parentNode) return selector.trim()
 		if (node.id) return `#${node.id} ${selector}`.trim()
-
 		let currentSelector = ""
-
+		console.log(node.tagName, "selector")
 		// Use the `name` attribute if present, which is less common but quite specific
 		if (node.name) {
 			currentSelector = `[name="${node.name}"]`
@@ -170,8 +171,16 @@ class ConfigAi implements ConfigAiInterface {
 					node.textContent.includes(data.value) &&
 					node.parentNode.nodeName !== "SCRIPT"
 				) {
-					let selector = this.#constructSelector(node.parentNode, 0)
-					data.selector = selector
+					console.log(node, node.textContent)
+					if (node.parentNode.nodeName !== "LABEL") {
+						let selector = this.#constructSelector(
+							node.parentNode,
+							0
+						)
+						data.selector = selector
+					} else {
+						data.delete = true
+					}
 				}
 			})
 		}
@@ -282,16 +291,16 @@ class ConfigAi implements ConfigAiInterface {
 			setTimeout(async () => {
 				let pageText = document.querySelector("body").innerText
 				let domItems = await this.#identifyPII(pageText, pagePath)
-				// console.log(domItems)
-				// if (domItems.length > 0) {
-				// 	this.#findNodesWithPII(domItems)
-				// 	let domTree = this.#pruneAndSerializeDOM(
-				// 		document.body,
-				// 		domItems
-				// 	)
-				// 	domItems = await this.#generateSelectors(domTree, domItems)
-
-				// }
+				if (domItems.length > 0) {
+					this.#findNodesWithPII(domItems)
+					domItems = domItems.filter((item) => !item.delete)
+					console.log(domItems)
+					let domTree = this.#pruneAndSerializeDOM(
+						document.body,
+						domItems
+					)
+					// domItems = await this.#generateSelectors(domTree, domItems)
+				}
 				domItems = this.#findInputFields(domItems)
 				this.#saveToCache(domItems, pagePath, "domItems")
 				this.#highlightNodesWithPII(domItems)
