@@ -7,7 +7,8 @@
 	"scripts": {
 		"dev": "plasmo dev",
 		"build": "plasmo build",
-		"package": "plasmo package"
+		"package": "plasmo package",
+		"build-css": "tailwindcss build src/style.css -o build/chrome-mv3-dev/dist/output.css"
 	},
 	"dependencies": {
 		"@headlessui/react": "^1.7.19",

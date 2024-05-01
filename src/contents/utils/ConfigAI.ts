@@ -296,7 +296,7 @@ class ConfigAi implements ConfigAiInterface {
 				this.#saveToCache(domItems, pagePath, "domItems")
 				this.#highlightNodesWithPII(domItems)
 			}, 3000)
-		} else {
+		} else if (this.isOn) {
 			setTimeout(async () => {
 				let domItems = this.cache[pagePath].domItems
 				print.table(domItems)
