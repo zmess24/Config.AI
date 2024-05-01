@@ -44,10 +44,9 @@ class ConfigAi implements ConfigAiInterface {
 
 	#constructSelector(node, depth = 0, selector = "") {
 		// End recursion if base cases are met
-		if (depth === 6 || !node.parentNode) return selector.trim()
+		if (depth === 4 || !node.parentNode) return selector.trim()
 		if (node.id) return `#${node.id} ${selector}`.trim()
 		let currentSelector = ""
-		console.log(node.tagName, "selector")
 		// Use the `name` attribute if present, which is less common but quite specific
 		if (node.name) {
 			currentSelector = `[name="${node.name}"]`
@@ -294,16 +293,17 @@ class ConfigAi implements ConfigAiInterface {
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
 					domItems = domItems.filter((item) => !item.delete)
-					console.log(domItems)
+
 					let domTree = this.#pruneAndSerializeDOM(
 						document.body,
 						domItems
 					)
-					// domItems = await this.#generateSelectors(domTree, domItems)
+
+					domItems = await this.#generateSelectors(domTree, domItems)
 				}
 				domItems = this.#findInputFields(domItems)
-				this.#saveToCache(domItems, pagePath, "domItems")
 				this.#highlightNodesWithPII(domItems)
+				this.#saveToCache(domItems, pagePath, "domItems")
 			}, 3000)
 		} else if (this.isOn) {
 			setTimeout(async () => {
