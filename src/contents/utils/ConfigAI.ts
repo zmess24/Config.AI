@@ -169,6 +169,35 @@ class ConfigAi implements ConfigAiInterface {
 		})
 	}
 
+	#findInputFields(domItems) {
+		const inputs = document.querySelectorAll("input")
+		// Filter to get only visible inputs
+		const visibleInputs = Array.from(inputs).filter((input) => {
+			const style = window.getComputedStyle(input)
+			return (
+				style.display !== "none" &&
+				style.visibility !== "hidden" &&
+				input.offsetWidth > 0 &&
+				input.offsetHeight > 0
+			)
+		})
+
+		// Iterate over all input fields in the DOM
+		visibleInputs.forEach((input) => {
+			let domItem = {
+				type: "Input",
+				typeOfInformation: "Input Field",
+				confidence: "High",
+				value: "",
+				selector: this.#constructInputSelector(input)
+			}
+
+			domItems.push(domItem)
+		})
+
+		return domItems
+	}
+
 	/**
     |--------------------------------------------------
     | Private Cache Methods
@@ -232,17 +261,19 @@ class ConfigAi implements ConfigAiInterface {
 			setTimeout(async () => {
 				let pageText = document.querySelector("body").innerText
 				let domItems = await this.#identifyPII(pageText, pagePath)
-				console.log(domItems)
-				if (domItems.length > 0) {
-					this.#findNodesWithPII(domItems)
-					let domTree = this.#pruneAndSerializeDOM(
-						document.body,
-						domItems
-					)
-					domItems = await this.#generateSelectors(domTree, domItems)
-					this.#saveToCache(domItems, pagePath, "domItems")
-					this.#highlightNodesWithPII(domItems)
-				}
+				// console.log(domItems)
+				// if (domItems.length > 0) {
+				// 	this.#findNodesWithPII(domItems)
+				// 	let domTree = this.#pruneAndSerializeDOM(
+				// 		document.body,
+				// 		domItems
+				// 	)
+				// 	domItems = await this.#generateSelectors(domTree, domItems)
+					
+				// }
+				domItems = this.#findInputFields(domItems)
+				this.#saveToCache(domItems, pagePath, "domItems")
+				this.#highlightNodesWithPII(domItems)
 			}, 3000)
 		} else {
 			setTimeout(async () => {
