@@ -72,6 +72,27 @@ class ConfigAi implements ConfigAiInterface {
 		return this.#constructSelector(node.parentNode, depth + 1, selector)
 	}
 
+	#constructInputSelector(input) {
+		let selector = ""
+		if (input.id) {
+			selector = `input#${input.id}`
+		} else if (input.name) {
+			selector = `input[name="${input.name}"]`
+		} else if (input.type) {
+			selector = `input[type="${input.type}"]`
+		} else if (input.placeholder) {
+			selector = `input[placeholder="${input.placeholder}"]`
+		} else if (input.ariaLabel) {
+			selector = `input[aria-label="${input.ariaLabel}"]`
+		} else if (input.className) {
+			selector = `input.${input.className}`
+		} else {
+			selector = "input"
+		}
+
+		return selector
+	}
+
 	#pruneAndSerializeDOM(
 		rootElement: HtmlHTMLAttributes,
 		keepTextKeywords: Array<string>
@@ -269,7 +290,7 @@ class ConfigAi implements ConfigAiInterface {
 				// 		domItems
 				// 	)
 				// 	domItems = await this.#generateSelectors(domTree, domItems)
-					
+
 				// }
 				domItems = this.#findInputFields(domItems)
 				this.#saveToCache(domItems, pagePath, "domItems")
