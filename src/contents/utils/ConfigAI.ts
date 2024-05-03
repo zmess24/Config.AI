@@ -20,17 +20,11 @@ class ConfigAi implements ConfigAiInterface {
 	constructor(provider: string, isOn: boolean) {
 		this.provider = provider
 		this.isOn = isOn
-		this.cache = JSON.parse(
-			window.localStorage.getItem("config.ai") || "{}"
-		)
-		this.nonTextBasedSelectors =
-			"script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
+		this.cache = JSON.parse(window.localStorage.getItem("config.ai") || "{}")
+		this.nonTextBasedSelectors = "script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
 		this.inputTypes = "input, textarea, select, label, option"
 
-		print.log(
-			`Provider: ${this.provider} | Session: ${this.isOn}`,
-			"#3f51b5"
-		)
+		print.log(`Provider: ${this.provider} | Session: ${this.isOn}`, "#3f51b5")
 	}
 
 	/**
@@ -41,32 +35,6 @@ class ConfigAi implements ConfigAiInterface {
 
 	#createTreeWalker(nodeFilter) {
 		return document.createTreeWalker(document.body, nodeFilter, null)
-	}
-
-	#constructSelector(node, depth = 0, selector = "") {
-		// End recursion if base cases are met
-		if (depth === 4 || !node.parentNode) return selector.trim()
-		if (node.id) return `#${node.id} ${selector}`.trim()
-		let currentSelector = ""
-		// Use the `name` attribute if present, which is less common but quite specific
-		if (node.name) {
-			currentSelector = `[name="${node.name}"]`
-		} else if (node.className) {
-			const classes = node.className.split(" ")
-			if (classes.length > 0) {
-				currentSelector = `.${classes.join(".")}`
-			} else {
-				currentSelector = node.tagName.toLowerCase() // Fallback to tagName if no suitable class found
-			}
-		} else {
-			currentSelector = node.tagName.toLowerCase()
-		}
-
-		// Combine the current selector with the accumulated selectors
-		selector = `${currentSelector} ${selector}`.trim()
-
-		// Recurse, incrementing depth to limit recursion length
-		return this.#constructSelector(node.parentNode, depth + 1, selector)
 	}
 
 	#constructInputSelector(input) {
@@ -89,25 +57,18 @@ class ConfigAi implements ConfigAiInterface {
 		return selector
 	}
 
-	#pruneAndSerializeDOM(
-		rootElement: HtmlHTMLAttributes,
-		keepTextKeywords: Array<string>
-	) {
+	#pruneAndSerializeDOM(rootElement: HtmlHTMLAttributes, keepTextKeywords: Array<string>) {
 		// Create a deep clone of the rootElement to work on
 		const clonedElement = rootElement.cloneNode(true)
 
 		// Find all elements matching the selectors within the clonedElement
-		const nonTextBasedElements = clonedElement.querySelectorAll(
-			this.nonTextBasedSelectors
-		)
+		const nonTextBasedElements = clonedElement.querySelectorAll(this.nonTextBasedSelectors)
 
 		// Convert NodeList to array to manipulate the DOM safely while iterating
 		const elementsArray = Array.from(nonTextBasedElements)
 
 		// Remove each non-text-based element from the DOM
-		elementsArray.forEach((element: HTMLElement) =>
-			element.parentNode.removeChild(element)
-		)
+		elementsArray.forEach((element: HTMLElement) => element.parentNode.removeChild(element))
 
 		const allElements = clonedElement.querySelectorAll("*")
 
@@ -117,11 +78,7 @@ class ConfigAi implements ConfigAiInterface {
 			const attributes = Array.from(el.attributes)
 			attributes.forEach((attr: Attr) => {
 				// Preserve only 'class', 'id', and '[data-*]' attributes
-				if (
-					attr.name !== "class" &&
-					attr.name !== "id" &&
-					!attr.name.startsWith("data-")
-				) {
+				if (attr.name !== "class" && attr.name !== "id" && !attr.name.startsWith("data-")) {
 					el.removeAttribute(attr.name)
 				}
 			})
@@ -132,9 +89,7 @@ class ConfigAi implements ConfigAiInterface {
 			Array.from(el.childNodes).forEach((child) => {
 				if (child.nodeType === Node.TEXT_NODE) {
 					const textContent = child.nodeValue.trim()
-					const containsKeyword = keepTextKeywords.some(
-						(keyword: any) => textContent.includes(keyword.value)
-					)
+					const containsKeyword = keepTextKeywords.some((keyword: any) => textContent.includes(keyword.value))
 					if (!containsKeyword) {
 						child.nodeValue = "" // Clear the text node value
 					}
@@ -162,19 +117,11 @@ class ConfigAi implements ConfigAiInterface {
 
 		while ((node = walker.nextNode())) {
 			piiList.forEach((data) => {
-				if (
-					node.textContent.includes(data.value) &&
-					node.parentNode.nodeName !== "SCRIPT"
-				) {
+				if (node.textContent.includes(data.value) && node.parentNode.nodeName !== "SCRIPT") {
 					if (node.parentNode.nodeName !== "LABEL") {
-						let selector = this.#constructSelector(
-							node.parentNode,
-							0
-						)
-						data.selector = selector
-						// data.selector = finder(node.parentNode, {
-						// 	optimizedMinLength: 1
-						// })
+						data.selector = finder(node.parentNode, {
+							optimizedMinLength: 1
+						})
 					} else {
 						data.delete = true
 					}
@@ -197,9 +144,7 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#findInputFields(domItems) {
-		let inputs = Array.from(
-			document.querySelectorAll("input, select, textarea")
-		)
+		let inputs = Array.from(document.querySelectorAll("input, select, textarea"))
 
 		inputs.forEach((input: HTMLInputElement) => {
 			let domItem = {
@@ -210,8 +155,7 @@ class ConfigAi implements ConfigAiInterface {
 				selector: this.#constructInputSelector(input)
 			}
 
-			if (input.type !== "hidden" && input.type !== "checkbox")
-				domItems.push(domItem)
+			if (input.type !== "hidden" && input.type !== "checkbox") domItems.push(domItem)
 		})
 
 		return domItems
@@ -228,10 +172,7 @@ class ConfigAi implements ConfigAiInterface {
 		if (this.cache[url]) {
 			this.cache[url][type] = [...this.cache[url][type], ...payload]
 		} else {
-			this.cache[url] =
-				type === "domItems"
-					? { domItems: [...payload], apiItems: [] }
-					: { domItems: [], apiItems: [...payload] }
+			this.cache[url] = type === "domItems" ? { domItems: [...payload], apiItems: [] } : { domItems: [], apiItems: [...payload] }
 		}
 
 		localStorage.setItem("config.ai", JSON.stringify(this.cache))
@@ -254,11 +195,11 @@ class ConfigAi implements ConfigAiInterface {
 		return result.domItems
 	}
 
-	async #generateSelectors(domTree: string, domItems: Array<object>) {
+	async #generateSelectors(domItems: Array<object>) {
 		print.table(`Refining Selectors`, domItems)
 		const { result } = await sendToBackground({
-			name: "pii/generate",
-			body: { domTree, domItems }
+			name: "pii/refine",
+			body: { domItems }
 		})
 
 		return result.domItems
@@ -283,12 +224,7 @@ class ConfigAi implements ConfigAiInterface {
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
 					domItems = domItems.filter((item) => !item.delete)
-					// let domTree = this.#pruneAndSerializeDOM(
-					// 	document.body,
-					// 	domItems
-					// )
-
-					// domItems = await this.#generateSelectors(domTree, domItems)
+					domItems = await this.#generateSelectors(domItems)
 				}
 				domItems = this.#findInputFields(domItems)
 				this.#highlightNodesWithPII(domItems)

@@ -6,12 +6,12 @@ import googleLogo from "data-base64:~core/assets/images/google.png"
 import openaiLogo from "data-base64:~core/assets/images/openai.png"
 import { JsonOutputFunctionsParser } from "langchain/output_parsers"
 import { generateSelectorsSchema, identifyPiiSchema } from "~core/llms/parsers"
-import { generateSelectorsPrompt, identifyPiiPrompt } from "~core/llms/prompts"
+import { identifyPiiPrompt, refineSelectors } from "~core/llms/prompts"
 
 const chainMap = {
 	identifyPii: { prompt: identifyPiiPrompt, schema: identifyPiiSchema },
-	generateSelectors: {
-		prompt: generateSelectorsPrompt,
+	refineSelectors: {
+		prompt: refineSelectors,
 		schema: generateSelectorsSchema
 	}
 }
@@ -32,9 +32,7 @@ const modelMap = [
 				// Load Prompt & Parser
 				let modelPrompt = await prompt.format({ ...promptArguments })
 
-				const runnable = model
-					.bind({ functions: [schema], function_call: { name } })
-					.pipe(parser)
+				const runnable = model.bind({ functions: [schema], function_call: { name } }).pipe(parser)
 				console.log(modelPrompt)
 				const result = await runnable.invoke(modelPrompt)
 				return result
@@ -59,9 +57,7 @@ const modelMap = [
 				// Load Prompt & Parser
 				let modelPrompt = await prompt.format({ ...promptArguments })
 
-				const runnable = model
-					.bind({ functions: [schema], function_call: { name } })
-					.pipe(parser)
+				const runnable = model.bind({ functions: [schema], function_call: { name } }).pipe(parser)
 				console.log(modelPrompt)
 				const result = await runnable.invoke(modelPrompt)
 				return result
@@ -89,9 +85,7 @@ const modelMap = [
 				// Load Prompt & Parser
 				let modelPrompt = await prompt.format({ ...promptArguments })
 
-				const runnable = model
-					.bind({ functions: [schema], function_call: { name } })
-					.pipe(parser)
+				const runnable = model.bind({ functions: [schema], function_call: { name } }).pipe(parser)
 				console.log(modelPrompt)
 				const result = await runnable.invoke(modelPrompt)
 				return result
@@ -104,9 +98,7 @@ const modelMap = [
 ]
 
 function getModel(provider: string, apiKey: string) {
-	return modelMap
-		.find((model) => model.provider === provider)
-		.initModel(apiKey)
+	return modelMap.find((model) => model.provider === provider).initModel(apiKey)
 }
 
 async function invokeChain(model, name, promptArguments) {
@@ -116,9 +108,7 @@ async function invokeChain(model, name, promptArguments) {
 		// Load Prompt & Parser
 		let modelPrompt = await prompt.format({ ...promptArguments })
 
-		const runnable = model
-			.bind({ functions: [schema], function_call: { name } })
-			.pipe(parser)
+		const runnable = model.bind({ functions: [schema], function_call: { name } }).pipe(parser)
 		console.log(modelPrompt)
 		const result = await runnable.invoke(modelPrompt)
 		return result

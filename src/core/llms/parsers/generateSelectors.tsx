@@ -1,5 +1,5 @@
 export const generateSelectorsSchema = {
-	name: "generateSelectors",
+	name: "refineSelectors",
 	description: "Extracts PII and PCI from text data",
 	parameters: {
 		type: "object", // Ensuring the top-level schema is an object
@@ -13,19 +13,16 @@ export const generateSelectorsSchema = {
 						type: {
 							type: "string",
 							enum: ["PII", "PCI"],
-							description:
-								"Whether the identified data is PII or PCI."
+							description: "Whether the identified data is PII or PCI."
 						},
 						typeOfInformation: {
 							type: "string",
-							description:
-								"Classification category of the identified data."
+							description: "Classification category of the identified data."
 						},
 						confidence: {
 							type: "string",
 							enum: ["Low", "Medium", "High"],
-							description:
-								"How confident the model is in the identification."
+							description: "How confident the model is in the identification."
 						},
 						value: {
 							type: "string",
@@ -33,17 +30,10 @@ export const generateSelectorsSchema = {
 						},
 						selector: {
 							type: "string",
-							description:
-								"The CSS selector for the identified value."
+							description: "The CSS selector for the identified value."
 						}
 					},
-					required: [
-						"type",
-						"typeOfInformation",
-						"confidence",
-						"value",
-						"selector"
-					]
+					required: ["type", "typeOfInformation", "confidence", "value", "selector"]
 				}
 			}
 		},
