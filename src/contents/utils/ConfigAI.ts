@@ -1,3 +1,4 @@
+import { finder } from "@medv/finder"
 import type { HtmlHTMLAttributes } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
@@ -171,6 +172,9 @@ class ConfigAi implements ConfigAiInterface {
 							0
 						)
 						data.selector = selector
+						// data.selector = finder(node.parentNode, {
+						// 	optimizedMinLength: 1
+						// })
 					} else {
 						data.delete = true
 					}
@@ -220,7 +224,7 @@ class ConfigAi implements ConfigAiInterface {
     */
 
 	#saveToCache(payload, url: string, type: string) {
-		print.table(payload)
+		print.table("PII/PCI Found:", payload)
 		if (this.cache[url]) {
 			this.cache[url][type] = [...this.cache[url][type], ...payload]
 		} else {
@@ -251,7 +255,7 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	async #generateSelectors(domTree: string, domItems: Array<object>) {
-		print.log(`Refining Selectors`, "#228B22")
+		print.table(`Refining Selectors`, domItems)
 		const { result } = await sendToBackground({
 			name: "pii/generate",
 			body: { domTree, domItems }
@@ -279,11 +283,10 @@ class ConfigAi implements ConfigAiInterface {
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
 					domItems = domItems.filter((item) => !item.delete)
-					print.table(domItems)
-					let domTree = this.#pruneAndSerializeDOM(
-						document.body,
-						domItems
-					)
+					// let domTree = this.#pruneAndSerializeDOM(
+					// 	document.body,
+					// 	domItems
+					// )
 
 					// domItems = await this.#generateSelectors(domTree, domItems)
 				}
@@ -294,7 +297,7 @@ class ConfigAi implements ConfigAiInterface {
 		} else if (this.isOn) {
 			setTimeout(async () => {
 				let domItems = this.cache[pagePath].domItems
-				print.table(domItems)
+				print.table("PII/PCI Found", domItems)
 				this.#highlightNodesWithPII(domItems)
 			}, 3000)
 		}

@@ -17,6 +17,7 @@
 		"@langchain/core": "^0.1.60",
 		"@langchain/google-genai": "^0.0.11",
 		"@langchain/openai": "^0.0.28",
+		"@medv/finder": "^3.2.0",
 		"@plasmohq/messaging": "^0.6.2",
 		"@plasmohq/redux-persist": "^6.1.0",
 		"@plasmohq/storage": "^1.10.0",

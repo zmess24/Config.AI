@@ -23,6 +23,9 @@ dependencies:
   '@langchain/openai':
     specifier: ^0.0.28
     version: 0.0.28
+  '@medv/finder':
+    specifier: ^3.2.0
+    version: 3.2.0
   '@plasmohq/messaging':
     specifier: ^0.6.2
     version: 0.6.2(react@18.2.0)
@@ -1071,6 +1074,10 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@medv/finder@3.2.0:
+    resolution: {integrity: sha512-JmU7JIBwyL8RAzefvzALT4sP2M0biGk8i2invAgpQmma/QgfsaqoHIvJ7S0YC8n9hUVG8X3Leul2nGa06PvhbQ==}
+    dev: false
 
   /@mischnic/json-sourcemap@0.1.0:
     resolution: {integrity: sha512-dQb3QnfNqmQNYA4nFSN/uLaByIic58gOXq4Y4XqLOWmOrw73KmJPt/HLyG0wvn1bnR6mBKs/Uwvkh+Hns1T0XA==}
