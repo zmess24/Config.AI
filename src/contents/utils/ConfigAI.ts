@@ -196,7 +196,8 @@ class ConfigAi implements ConfigAiInterface {
 		let inputs = Array.from(
 			document.querySelectorAll("input, select, textarea")
 		)
-		let inputItems = inputs.map((input: HTMLInputElement) => {
+
+		inputs.forEach((input: HTMLInputElement) => {
 			let domItem = {
 				type: "Input",
 				typeOfInformation: "Input Field",
@@ -204,6 +205,7 @@ class ConfigAi implements ConfigAiInterface {
 				value: "",
 				selector: this.#constructInputSelector(input)
 			}
+
 			if (input.type !== "hidden" && input.type !== "checkbox")
 				domItems.push(domItem)
 		})
@@ -237,8 +239,9 @@ class ConfigAi implements ConfigAiInterface {
     |--------------------------------------------------
     */
 
-	async #identifyPII(pageText: string, pagePath: string) {
+	async #identifyPII(pagePath: string) {
 		print.log(`Scanning ${pagePath}`, "#228B22")
+		let pageText = document.querySelector("body").innerText
 		const { result } = await sendToBackground({
 			name: "pii/identify",
 			body: { pageText }
@@ -272,18 +275,17 @@ class ConfigAi implements ConfigAiInterface {
 		let pagePath = window.location.origin + window.location.pathname
 		if (this.isOn && !this.cache[pagePath]) {
 			setTimeout(async () => {
-				let pageText = document.querySelector("body").innerText
-				let domItems = await this.#identifyPII(pageText, pagePath)
+				let domItems = await this.#identifyPII(pagePath)
 				if (domItems.length > 0) {
 					this.#findNodesWithPII(domItems)
 					domItems = domItems.filter((item) => !item.delete)
-
+					print.table(domItems)
 					let domTree = this.#pruneAndSerializeDOM(
 						document.body,
 						domItems
 					)
 
-					domItems = await this.#generateSelectors(domTree, domItems)
+					// domItems = await this.#generateSelectors(domTree, domItems)
 				}
 				domItems = this.#findInputFields(domItems)
 				this.#highlightNodesWithPII(domItems)
