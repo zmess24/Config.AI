@@ -50,18 +50,14 @@ class ConfigAi implements ConfigAiInterface {
 		// Use the `name` attribute if present, which is less common but quite specific
 		if (node.name) {
 			currentSelector = `[name="${node.name}"]`
-		}
-		// Use classes, if available; consider using a specific class if multiple are present
-		else if (node.className) {
+		} else if (node.className) {
 			const classes = node.className.split(" ")
 			if (classes.length > 0) {
 				currentSelector = `.${classes.join(".")}`
 			} else {
 				currentSelector = node.tagName.toLowerCase() // Fallback to tagName if no suitable class found
 			}
-		}
-		// Fallback to tagName if no other identifiers are present
-		else {
+		} else {
 			currentSelector = node.tagName.toLowerCase()
 		}
 
@@ -74,20 +70,19 @@ class ConfigAi implements ConfigAiInterface {
 
 	#constructInputSelector(input) {
 		let selector = ""
-		if (input.id) {
-			selector = `input#${input.id}`
-		} else if (input.name) {
-			selector = `input[name="${input.name}"]`
+		let tagName = input.tagName.toLowerCase()
+		if (input.name) {
+			selector = `${tagName}[name="${input.name}"]`
+		} else if (input.id) {
+			selector = `${tagName}[id="${input.id}"]`
 		} else if (input.type) {
-			selector = `input[type="${input.type}"]`
+			selector = `${tagName}[type="${input.type}"]`
 		} else if (input.placeholder) {
-			selector = `input[placeholder="${input.placeholder}"]`
+			selector = `${tagName}[placeholder="${input.placeholder}"]`
 		} else if (input.ariaLabel) {
-			selector = `input[aria-label="${input.ariaLabel}"]`
+			selector = `${tagName}[aria-label="${input.ariaLabel}"]`
 		} else if (input.className) {
-			selector = `input.${input.className}`
-		} else {
-			selector = "input"
+			selector = `${tagName}.${input.className}`
 		}
 
 		return selector
@@ -198,20 +193,22 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#findInputFields(domItems) {
-		const inputs = document.querySelectorAll("input")
+		let inputs = document.querySelectorAll("input, select, textarea")
 		// Filter to get only visible inputs
-		const visibleInputs = Array.from(inputs).filter((input) => {
-			const style = window.getComputedStyle(input)
-			return (
-				style.display !== "none" &&
-				style.visibility !== "hidden" &&
-				input.offsetWidth > 0 &&
-				input.offsetHeight > 0
-			)
-		})
+		// const visibleInputs = Array.from(inputs).filter(
+		// 	(input: HTMLElement) => {
+		// 		const style = window.getComputedStyle(input)
 
+		// 		return (
+		// 			style.display !== "none" &&
+		// 			style.visibility !== "hidden" &&
+		// 			input.offsetWidth > 0 &&
+		// 			input.offsetHeight > 0
+		// 		)
+		// 	}
+		// )
 		// Iterate over all input fields in the DOM
-		visibleInputs.forEach((input) => {
+		inputs.forEach((input: HTMLInputElement) => {
 			let domItem = {
 				type: "Input",
 				typeOfInformation: "Input Field",
@@ -219,8 +216,7 @@ class ConfigAi implements ConfigAiInterface {
 				value: "",
 				selector: this.#constructInputSelector(input)
 			}
-
-			domItems.push(domItem)
+			if (input.type !== "hidden") domItems.push(domItem)
 		})
 
 		return domItems
