@@ -193,22 +193,10 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#findInputFields(domItems) {
-		let inputs = document.querySelectorAll("input, select, textarea")
-		// Filter to get only visible inputs
-		// const visibleInputs = Array.from(inputs).filter(
-		// 	(input: HTMLElement) => {
-		// 		const style = window.getComputedStyle(input)
-
-		// 		return (
-		// 			style.display !== "none" &&
-		// 			style.visibility !== "hidden" &&
-		// 			input.offsetWidth > 0 &&
-		// 			input.offsetHeight > 0
-		// 		)
-		// 	}
-		// )
-		// Iterate over all input fields in the DOM
-		inputs.forEach((input: HTMLInputElement) => {
+		let inputs = Array.from(
+			document.querySelectorAll("input, select, textarea")
+		)
+		let inputItems = inputs.map((input: HTMLInputElement) => {
 			let domItem = {
 				type: "Input",
 				typeOfInformation: "Input Field",
@@ -216,7 +204,8 @@ class ConfigAi implements ConfigAiInterface {
 				value: "",
 				selector: this.#constructInputSelector(input)
 			}
-			if (input.type !== "hidden") domItems.push(domItem)
+			if (input.type !== "hidden" && input.type !== "checkbox")
+				domItems.push(domItem)
 		})
 
 		return domItems
