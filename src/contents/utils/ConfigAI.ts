@@ -186,7 +186,7 @@ class ConfigAi implements ConfigAiInterface {
 
 	async #identifyPII(pagePath: string) {
 		print.log(`Scanning ${pagePath}`, "#228B22")
-		let pageText = document.querySelector("body").innerText
+		let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
 		const { result } = await sendToBackground({
 			name: "pii/identify",
 			body: { pageText }
