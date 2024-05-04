@@ -57,59 +57,6 @@ class ConfigAi implements ConfigAiInterface {
 		return selector
 	}
 
-	#pruneAndSerializeDOM(rootElement: HtmlHTMLAttributes, keepTextKeywords: Array<string>) {
-		// Create a deep clone of the rootElement to work on
-		const clonedElement = rootElement.cloneNode(true)
-
-		// Find all elements matching the selectors within the clonedElement
-		const nonTextBasedElements = clonedElement.querySelectorAll(this.nonTextBasedSelectors)
-
-		// Convert NodeList to array to manipulate the DOM safely while iterating
-		const elementsArray = Array.from(nonTextBasedElements)
-
-		// Remove each non-text-based element from the DOM
-		elementsArray.forEach((element: HTMLElement) => element.parentNode.removeChild(element))
-
-		const allElements = clonedElement.querySelectorAll("*")
-
-		// Remove non-essential attributes from all elements
-		allElements.forEach((el: HTMLElement) => {
-			// Get an array of attribute names to consider for removal
-			const attributes = Array.from(el.attributes)
-			attributes.forEach((attr: Attr) => {
-				// Preserve only 'class', 'id', and '[data-*]' attributes
-				if (attr.name !== "class" && attr.name !== "id" && !attr.name.startsWith("data-")) {
-					el.removeAttribute(attr.name)
-				}
-			})
-		})
-
-		// Remove text from elements that do not contain specified keywords
-		allElements.forEach((el: HTMLElement) => {
-			Array.from(el.childNodes).forEach((child) => {
-				if (child.nodeType === Node.TEXT_NODE) {
-					const textContent = child.nodeValue.trim()
-					const containsKeyword = keepTextKeywords.some((keyword: any) => textContent.includes(keyword.value))
-					if (!containsKeyword) {
-						child.nodeValue = "" // Clear the text node value
-					}
-				}
-			})
-		})
-
-		const walker = this.#createTreeWalker(NodeFilter.SHOW_COMMENT)
-		let currentNode = walker.nextNode()
-
-		while (currentNode) {
-			currentNode.parentNode.removeChild(currentNode)
-			currentNode = walker.nextNode()
-		}
-		// Serialize the pruned DOM tree to a string
-		const serializer = new XMLSerializer()
-		const serializedDOM = serializer.serializeToString(clonedElement)
-		return serializedDOM
-	}
-
 	#findNodesWithPII(piiList) {
 		const textNodes = []
 		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
