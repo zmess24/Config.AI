@@ -34,6 +34,8 @@ async function main() {
 	initMessageHandlers(configAi)
 	// Scan the page for PII
 	configAi.scanPageForPII()
+	// Inject CSS sheet
+	configAi.injectCSS()
 }
 
 main()

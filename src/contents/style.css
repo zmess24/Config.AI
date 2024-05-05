@@ -8,3 +8,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* overlay.css */
+.configai-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+	z-index: 1000; /* High z-index to cover other content */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 20px;
+}
+
+.configai-close-button {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	cursor: pointer;
+	background: #444; /* Dark background for the button */
+	color: white;
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	border-radius: 15px; /* Circular button */
+	font-size: 16px;
+	font-weight: bold;
+}

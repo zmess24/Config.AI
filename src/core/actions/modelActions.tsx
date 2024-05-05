@@ -4,14 +4,9 @@ import type { ModelAuthenticteTypes, ModelIdentifyPiiTypes } from "~core/types"
 
 export const modelAuthenticate = createAsyncThunk(
 	"models/modelAuthenticate", // action type prefix
-	async (
-		{ apiKey, provider }: ModelAuthenticteTypes,
-		{ rejectWithValue }
-	) => {
+	async ({ apiKey, provider }: ModelAuthenticteTypes, { rejectWithValue }) => {
 		try {
-			let model = modelMap
-				.find((model) => model.provider === provider)
-				.initModel(apiKey)
+			let model = modelMap.find((model) => model.provider === provider).initModel(apiKey)
 			await model.invoke("Test connection")
 			return { provider, apiKey }
 		} catch (error) {
@@ -22,10 +17,7 @@ export const modelAuthenticate = createAsyncThunk(
 
 export const modelIdentifyPii = createAsyncThunk(
 	"models/modelIdentifyPii", // action type prefix
-	async (
-		{ pageText, apiKey }: ModelIdentifyPiiTypes,
-		{ rejectWithValue }
-	) => {
+	async ({ pageText, apiKey }: ModelIdentifyPiiTypes, { rejectWithValue }) => {
 		try {
 			console.log("TEST")
 		} catch (error) {

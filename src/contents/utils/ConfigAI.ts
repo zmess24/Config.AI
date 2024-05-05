@@ -80,12 +80,44 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#highlightNodesWithPII(domItems) {
+		function createOverlay(targetElement, selector) {
+			const overlay = document.createElement("div")
+			overlay.className = "configai-overlay"
+			overlay.textContent = selector
+
+			// Create a close button and append it to the overlay
+			const closeButton = document.createElement("div")
+			closeButton.className = "configai-close-button"
+			closeButton.textContent = "X" // Text for the close button
+			closeButton.onclick = function () {
+				removeOverlay(overlay)
+			}
+
+			// Append the close button and the overlay text or content
+			overlay.appendChild(closeButton)
+
+			// Append the overlay to the target element
+			targetElement.style.position = "relative" // Ensure the target can hold absolute positioned children
+			targetElement.appendChild(overlay)
+
+			// Optionally store the overlay for later removal
+			return overlay
+		}
+
+		function removeOverlay(overlay) {
+			overlay.parentNode.removeChild(overlay)
+		}
+
 		domItems.forEach((data) => {
 			const elements = document.querySelectorAll(data.selector)
 			elements.forEach((element) => {
-				element.style.transition = "all 0.5s ease-in"
-				element.style.backgroundColor = "#A5B4FC"
-				element.style.border = "2px solid #4338ca"
+				if (data.type !== "Input") {
+					createOverlay(element, data.selector)
+				} else {
+					element.style.transition = "all 0.5s ease-in"
+					element.style.backgroundColor = "#A5B4FC"
+					element.style.border = "2px solid #4338ca"
+				}
 			})
 		})
 	}
@@ -157,6 +189,46 @@ class ConfigAi implements ConfigAiInterface {
     | Public Methods
     |--------------------------------------------------
     */
+
+	injectCSS() {
+		const style = document.createElement("style")
+		style.id = "config-ai"
+		style.textContent = `
+			.configai-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgb(165 180 252);
+				z-index: 1000;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				color: white;
+				font-size: 10px;
+				transition: all 0.5s ease-in;
+				border: 2px solid #4338ca;
+				opacity: 0.7
+			}
+			.configai-close-button {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				cursor: pointer;
+				background: #444;
+				color: white;
+				width: 5px;
+				height: 5px;
+				line-height: 5px;
+				text-align: center;
+				border-radius: 5px;
+				font-size: 10px;
+				font-weight: bold;
+			}
+`
+		document.head.appendChild(style)
+	}
 
 	clearCache() {
 		this.cache = {}
