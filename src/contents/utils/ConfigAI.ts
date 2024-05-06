@@ -1,7 +1,12 @@
 import { finder } from "@medv/finder"
-import type { HtmlHTMLAttributes } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
+
+/**
+|--------------------------------------------------
+| Type Definitions
+|--------------------------------------------------
+*/
 
 export interface ConfigAiInterface {
 	provider: string
@@ -10,6 +15,27 @@ export interface ConfigAiInterface {
 	inputTypes: string
 	cache: object
 }
+
+interface DomItemTypes {
+	type: string
+	typeOfInformation: string
+	confidence: string
+	value: string
+	selector: string
+	refinedSelector?: string
+}
+
+interface CacheUpdatePayloadTypes {
+	detectedData: Array<DomItemTypes>
+	targetUrl: string
+	dataType: string
+}
+
+/**
+|--------------------------------------------------
+| Core Class
+|--------------------------------------------------
+*/
 
 class ConfigAi implements ConfigAiInterface {
 	provider: string
@@ -30,32 +56,37 @@ class ConfigAi implements ConfigAiInterface {
 
 	/**
     |--------------------------------------------------
+    | Setter Methods
+    |--------------------------------------------------
+    */
+
+	setProvider(provider: string) {
+		this.provider = provider
+	}
+
+	setIsOn(isOn: boolean) {
+		this.isOn = isOn
+	}
+
+	setCache(updateType: "clear" | "update", payload?: CacheUpdatePayloadTypes) {
+		if (updateType === "clear") this.cache = {}
+
+		if (updateType === "update") {
+			let { detectedData, targetUrl, dataType } = payload
+			if (!this.cache[targetUrl]) this.cache[targetUrl] = { domItems: [], apiItems: [] }
+			this.cache[targetUrl][dataType] = [...this.cache[targetUrl][dataType], ...detectedData]
+			localStorage.setItem("config.ai", JSON.stringify(this.cache))
+		}
+	}
+
+	/**
+    |--------------------------------------------------
     | Private DOM Methods
     |--------------------------------------------------
     */
 
 	#createTreeWalker(nodeFilter) {
 		return document.createTreeWalker(document.body, nodeFilter, null)
-	}
-
-	#constructInputSelector(input) {
-		let selector = ""
-		let tagName = input.tagName.toLowerCase()
-		if (input.name) {
-			selector = `${tagName}[name="${input.name}"]`
-		} else if (input.id) {
-			selector = `${tagName}[id="${input.id}"]`
-		} else if (input.type) {
-			selector = `${tagName}[type="${input.type}"]`
-		} else if (input.placeholder) {
-			selector = `${tagName}[placeholder="${input.placeholder}"]`
-		} else if (input.ariaLabel) {
-			selector = `${tagName}[aria-label="${input.ariaLabel}"]`
-		} else if (input.className) {
-			selector = `${tagName}.${input.className}`
-		}
-
-		return selector
 	}
 
 	#findNodesWithPII(piiList) {
@@ -112,7 +143,7 @@ class ConfigAi implements ConfigAiInterface {
 		domItems.forEach((data) => {
 			const elements = document.querySelectorAll(data.selector)
 			elements.forEach((element) => {
-				if (data.type !== "Input") {
+				if (data.typeOfInformation !== "Input") {
 					if (data.selector) createOverlay(element, data.selector)
 				} else {
 					element.style.transition = "all 0.5s ease-in"
@@ -123,44 +154,56 @@ class ConfigAi implements ConfigAiInterface {
 		})
 	}
 
+	/**
+    |--------------------------------------------------
+    | Input Methods
+    |--------------------------------------------------
+    */
+
 	#findInputFields(domItems) {
-		let inputs = Array.from(document.querySelectorAll("input, select, textarea"))
+		const exclusionTypes = new Set(["hidden", "checkbox", "radio"])
+		const inputTypes = "input, select, textarea"
+		let inputs = Array.from(document.querySelectorAll(inputTypes))
 
 		inputs.forEach((input: HTMLInputElement) => {
-			let domItem = {
-				type: "Input",
-				typeOfInformation: "Input Field",
-				confidence: "High",
-				value: "",
-				selector: this.#constructInputSelector(input)
+			if (!exclusionTypes.has(input.type)) {
+				let domItem = {
+					type: input.type === "password" ? "PCI" : "PII",
+					typeOfInformation: "Input",
+					confidence: "High",
+					value: input.value || input.placeholder,
+					selector: this.#constructInputSelector(input)
+				}
+				domItems.push(domItem)
 			}
-
-			if (input.type !== "hidden" && input.type !== "checkbox" && input.placeholder) domItems.push(domItem)
 		})
 
 		return domItems
 	}
 
-	/**
-    |--------------------------------------------------
-    | Private Cache Methods
-    |--------------------------------------------------
-    */
-
-	#saveToCache(payload, url: string, type: string) {
-		print.table("PII/PCI Found:", payload)
-		if (this.cache[url]) {
-			this.cache[url][type] = [...this.cache[url][type], ...payload]
+	#constructInputSelector(input: HTMLInputElement) {
+		let tagName = input.tagName.toLowerCase()
+		// Attribute Priority
+		if (input.name) {
+			return `${tagName}[name="${input.name}"]`
+		} else if (input.id) {
+			return `${tagName}[id="${input.id}"]`
+		} else if (input.type) {
+			return `${tagName}[type="${input.type}"]`
+		} else if (input.placeholder) {
+			return `${tagName}[placeholder="${input.placeholder}"]`
+		} else if (input.ariaLabel) {
+			return `${tagName}[aria-label="${input.ariaLabel}"]`
+		} else if (input.className) {
+			return `${tagName}.${input.className}`
 		} else {
-			this.cache[url] = type === "domItems" ? { domItems: [...payload], apiItems: [] } : { domItems: [], apiItems: [...payload] }
+			return tagName
 		}
-
-		localStorage.setItem("config.ai", JSON.stringify(this.cache))
 	}
 
 	/**
     |--------------------------------------------------
-    | Private Background Worker Methods
+    | Background Worker Methods
     |--------------------------------------------------
     */
 
@@ -232,11 +275,6 @@ class ConfigAi implements ConfigAiInterface {
 		document.head.appendChild(style)
 	}
 
-	clearCache() {
-		this.cache = {}
-		localStorage.removeItem("config.ai")
-	}
-
 	scanPageForPII() {
 		try {
 			let pagePath = window.location.origin + window.location.pathname
@@ -250,7 +288,7 @@ class ConfigAi implements ConfigAiInterface {
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
-					this.#saveToCache(domItems, pagePath, "domItems")
+					this.setCache("update", { detectedData: domItems, targetUrl: pagePath, dataType: "domItems" })
 				}, 3000)
 			} else if (this.isOn) {
 				setTimeout(async () => {
