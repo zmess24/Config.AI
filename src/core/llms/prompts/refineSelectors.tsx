@@ -7,8 +7,6 @@ Task: Please simplify the included CSS selectors (delimited with XML tags) withi
  - If it looks like there is className obfuscation going on, please simplify it using a contains rule.
     * Example: ._ac-about__info-item_ib9jv_538
     * Simplified: [class*="_ac-about__info-item"]
- - Try to chain as few selectors together as possible to achieve the same result.
- - If you think each of the different selectors can be combined into a single selector, please do so.
 
 Output:
 Please return the same JSON array of domItem objects, with an additional "refinedSelector" key/value added to each object with the output of your analysis.

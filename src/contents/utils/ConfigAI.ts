@@ -112,7 +112,7 @@ class ConfigAi implements ConfigAiInterface {
 			const elements = document.querySelectorAll(data.selector)
 			elements.forEach((element) => {
 				if (data.type !== "Input") {
-					createOverlay(element, data.selector)
+					if (data.selector) createOverlay(element, data.selector)
 				} else {
 					element.style.transition = "all 0.5s ease-in"
 					element.style.backgroundColor = "#A5B4FC"
