@@ -134,7 +134,7 @@ class ConfigAi implements ConfigAiInterface {
 				selector: this.#constructInputSelector(input)
 			}
 
-			if (input.type !== "hidden" && input.type !== "checkbox") domItems.push(domItem)
+			if (input.type !== "hidden" && input.type !== "checkbox" && input.placeholder) domItems.push(domItem)
 		})
 
 		return domItems
