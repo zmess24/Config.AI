@@ -3,10 +3,11 @@ import type { HtmlHTMLAttributes } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
 
-interface ConfigAiInterface {
+export interface ConfigAiInterface {
 	provider: string
 	isOn: boolean
 	nonTextBasedSelectors: string
+	inputTypes: string
 	cache: object
 }
 
@@ -244,8 +245,8 @@ class ConfigAi implements ConfigAiInterface {
 					let domItems = await this.#identifyPII(pagePath)
 					if (domItems.length > 0) {
 						this.#findNodesWithPII(domItems)
-						domItems = domItems.filter((item) => !item.delete)
-						domItems = await this.#generateSelectors(domItems)
+						// domItems = domItems.filter((item) => !item.delete)
+						// domItems = await this.#generateSelectors(domItems)
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)

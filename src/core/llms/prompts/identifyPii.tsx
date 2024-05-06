@@ -2,14 +2,14 @@ import { PromptTemplate } from "@langchain/core/prompts"
 
 export const identifyPiiPrompt = PromptTemplate.fromTemplate(`
 Role: 
-You are an expert data security analyst skilled in identifying PII/PCI data in any provided text.
+You are an expert data security analyst, skilled in identifying PII/PCI data in any provided text.
 
 Task:
 Please identify any instances of PII/PCI in the following text (delimited with the <pagetext> XML tag) scraped from a webpage. Before giving your answer, please take time to think critically about the below guiding principles that will inform your answer:
 - List each instance of an item separately if it appears multiple times.
--  For each repeated instance, add a occurance number to the "typeOfInformation" output value to deliniate them (e.g "Phone Number #1, Phone Number #2).
+- For each repeated instance, add an occurance number to the "typeOfInformation" output value to deliniate each identified item (e.g "Phone Number #1, Phone Number #2).
 - Please consider any additional rules listed in attached the rules section (delimited with the <piiRules> XML tag). 
-- Keep in mind you may need to use adjacent text for additional context in making your classification determination. For example, in a phrase like "Hi, Zac", "Zac" is most likely PII.
+- Keep in mind you may need to use adjacent text for additional context in making your classification determinations. For example, in a phrase like "Hi Zac", "Zac" is most likely PII.
 
 <pagetext>
 {pageText}

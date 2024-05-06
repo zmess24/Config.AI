@@ -1,5 +1,3 @@
-import { config } from "process"
-import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
 
 /**
@@ -9,6 +7,19 @@ import { print } from "./print"
 */
 
 export function initMessageHandlers(configAi) {
+	// Inject Route Handler Script
+	const script = document.createElement("script")
+	script.src = chrome.runtime.getURL("scripts/routeHandlerScript.js")
+	;(document.head || document.documentElement).appendChild(script)
+
+	// Window Message Handler
+	window.addEventListener("message", (event) => {
+		if (event.source === window && event.data.type === "routeChange") {
+			configAi.scanPageForPII()
+		}
+	})
+
+	// Chrome Message Handler
 	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 		switch (message.name) {
 			case "providerConnected":
@@ -19,7 +30,6 @@ export function initMessageHandlers(configAi) {
 				break
 			case "startSession":
 				print.log(`Starting Session: ${configAi}`, "#228B22")
-				// print.log(`Starting Session:`, "#228B22")
 				configAi.scanPageForPII()
 				break
 			case "endSession":
@@ -38,18 +48,6 @@ export function initMessageHandlers(configAi) {
 				break
 			default:
 				break
-		}
-	})
-
-	window.addEventListener("message", (event) => {
-		if (event.source === window) {
-			switch (event.data.type) {
-				case "routeChange":
-					configAi.scanPageForPII()
-					break
-				default:
-					break
-			}
 		}
 	})
 }
