@@ -31,9 +31,13 @@ export const generateSelectorsSchema = {
 						selector: {
 							type: "string",
 							description: "The CSS selector for the identified value."
+						},
+						refinedSelector: {
+							type: "string",
+							description: "The simplified CSS selector based on the analysis of the original CSS selector."
 						}
 					},
-					required: ["type", "typeOfInformation", "confidence", "value", "selector"]
+					required: ["type", "typeOfInformation", "confidence", "value", "selector", "refinedSelector"]
 				}
 			}
 		},

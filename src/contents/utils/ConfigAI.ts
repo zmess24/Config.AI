@@ -209,7 +209,8 @@ class ConfigAi implements ConfigAiInterface {
 				font-size: 10px;
 				transition: all 0.5s ease-in;
 				border: 2px solid #4338ca;
-				opacity: 0.7
+				opacity: 0.8;
+				padding: 2px;
 			}
 			.configai-close-button {
 				position: absolute;
@@ -236,25 +237,29 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	scanPageForPII() {
-		let pagePath = window.location.origin + window.location.pathname
-		if (this.isOn && !this.cache[pagePath]) {
-			setTimeout(async () => {
-				let domItems = await this.#identifyPII(pagePath)
-				if (domItems.length > 0) {
-					this.#findNodesWithPII(domItems)
-					domItems = domItems.filter((item) => !item.delete)
-					domItems = await this.#generateSelectors(domItems)
-				}
-				domItems = this.#findInputFields(domItems)
-				this.#highlightNodesWithPII(domItems)
-				this.#saveToCache(domItems, pagePath, "domItems")
-			}, 3000)
-		} else if (this.isOn) {
-			setTimeout(async () => {
-				let domItems = this.cache[pagePath].domItems
-				print.table("PII/PCI Found", domItems)
-				this.#highlightNodesWithPII(domItems)
-			}, 3000)
+		try {
+			let pagePath = window.location.origin + window.location.pathname
+			if (this.isOn && !this.cache[pagePath]) {
+				setTimeout(async () => {
+					let domItems = await this.#identifyPII(pagePath)
+					if (domItems.length > 0) {
+						this.#findNodesWithPII(domItems)
+						domItems = domItems.filter((item) => !item.delete)
+						domItems = await this.#generateSelectors(domItems)
+					}
+					domItems = this.#findInputFields(domItems)
+					this.#highlightNodesWithPII(domItems)
+					this.#saveToCache(domItems, pagePath, "domItems")
+				}, 3000)
+			} else if (this.isOn) {
+				setTimeout(async () => {
+					let domItems = this.cache[pagePath].domItems
+					print.table("PII/PCI Found", domItems)
+					this.#highlightNodesWithPII(domItems)
+				}, 3000)
+			}
+		} catch (err) {
+			print.log(`Error Message: ${err.message}`)
 		}
 	}
 }
