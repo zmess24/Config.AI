@@ -21,6 +21,7 @@ export function initMessageHandlers(configAi) {
 
 	// Chrome Message Handler
 	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+		print.log(JSON.stringify(message))
 		switch (message.name) {
 			case "providerConnected":
 				print.log(`Connected to Provider: ${message.body}`, "#228B22")
@@ -47,6 +48,12 @@ export function initMessageHandlers(configAi) {
 			case "popupOpened":
 				print.log("Popup Opened")
 				sendResponse({ recordedPages: configAi.cache })
+				break
+			case "session/messageHandler":
+				print.log("Starting DOM Listener")
+				break
+			case "session/endDomListener":
+				print.log("Ending DOM Listener")
 				break
 			default:
 				break

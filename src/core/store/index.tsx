@@ -1,16 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import type { Action, ThunkAction } from "@reduxjs/toolkit"
 import { sendToBackground } from "@plasmohq/messaging"
-import {
-	FLUSH,
-	PAUSE,
-	PERSIST,
-	persistStore,
-	PURGE,
-	REGISTER,
-	REHYDRATE,
-	RESYNC
-} from "@plasmohq/redux-persist"
+import { FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE, RESYNC } from "@plasmohq/redux-persist"
 import { Storage } from "@plasmohq/storage"
 import reducer from "~core/reducers"
 import { persistConfig } from "./persistConfig"
@@ -23,12 +14,7 @@ import { persistConfig } from "./persistConfig"
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
-export type AppThunk<ReturnType = void> = ThunkAction<
-	ReturnType,
-	RootState,
-	unknown,
-	Action<string>
->
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action<string>>
 
 /**
 |--------------------------------------------------
@@ -47,7 +33,6 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 	const result = next(action)
 	switch (result.type) {
 		case "models/modelAuthenticate/fulfilled":
-			console.log(result.payload.provider)
 			sendToBackground({
 				name: "provider/connected",
 				body: result.payload.provider
@@ -73,6 +58,12 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 				name: result.type
 			})
 			break
+		case "session/startDomListener":
+			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
+			break
+		case "session/endDomListener":
+			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
+			break
 		default:
 			break
 	}
@@ -91,15 +82,7 @@ export const store = configureStore({
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
 			serializableCheck: {
-				ignoredActions: [
-					FLUSH,
-					REHYDRATE,
-					PAUSE,
-					PERSIST,
-					PURGE,
-					REGISTER,
-					RESYNC
-				]
+				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER, RESYNC]
 			}
 		})
 			.concat(chromeStorageMiddleware)

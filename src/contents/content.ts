@@ -34,11 +34,11 @@ async function main() {
 	// Inject CSS sheet
 	configAi.injectCSS()
 
-	document.addEventListener("click", function (event: any) {
-		event.preventDefault()
-		const selector = finder(event.target)
-		console.log("TEST: ", selector, event.target.innerText)
-	})
+	// document.addEventListener("click", function (event: any) {
+	// 	event.preventDefault()
+	// 	const selector = finder(event.target)
+	// 	console.log("TEST: ", selector, event.target.innerText)
+	// })
 }
 
 main()
