@@ -29,7 +29,7 @@ export function initMessageHandlers(configAi) {
 				print.log(`Disconnected from Provider`, "#850101")
 				break
 			case "startSession":
-				print.log(`Starting Session: ${JSON.stringify(configAi)}`, "#228B22")
+				print.log(`Starting Session`, "#228B22")
 				configAi.setIsOn(true)
 				configAi.scanPageForPII()
 				break
