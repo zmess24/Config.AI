@@ -1,3 +1,4 @@
+import { finder } from "@medv/finder"
 import type { PlasmoCSConfig } from "plasmo"
 import { sendToBackground } from "@plasmohq/messaging"
 import ConfigAi from "./utils/ConfigAI"
@@ -32,6 +33,12 @@ async function main() {
 	configAi.scanPageForPII()
 	// Inject CSS sheet
 	configAi.injectCSS()
+
+	document.addEventListener("click", function (event: any) {
+		event.preventDefault()
+		const selector = finder(event.target)
+		console.log("TEST: ", selector, event.target.innerText)
+	})
 }
 
 main()

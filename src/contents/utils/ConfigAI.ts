@@ -31,6 +31,14 @@ interface CacheUpdatePayloadTypes {
 	dataType: string
 }
 
+interface NodeToAdd {
+	selector: string
+	type: string
+	typeOfInformation: string
+	confidence: string
+	value: string
+}
+
 /**
 |--------------------------------------------------
 | Core Class
@@ -43,6 +51,7 @@ class ConfigAi implements ConfigAiInterface {
 	nonTextBasedSelectors: string
 	inputTypes: string
 	cache: object
+	nodesToAdd: Array<NodeToAdd>
 
 	constructor(provider: string, isOn: boolean) {
 		this.provider = provider
@@ -50,6 +59,7 @@ class ConfigAi implements ConfigAiInterface {
 		this.cache = JSON.parse(window.localStorage.getItem("config.ai") || "{}")
 		this.nonTextBasedSelectors = "script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
 		this.inputTypes = "input, textarea, select, label, option"
+		this.nodesToAdd = []
 
 		print.log(`Provider: ${this.provider} | Session: ${this.isOn}`, "#3f51b5")
 	}
@@ -99,7 +109,7 @@ class ConfigAi implements ConfigAiInterface {
 				if (node.textContent.includes(data.value) && node.parentNode.nodeName !== "SCRIPT") {
 					if (node.parentNode.nodeName !== "LABEL") {
 						data.selector = finder(node.parentNode, {
-							optimizedMinLength: 1
+							optimizedMinLength: 2
 						})
 					} else {
 						data.delete = true
@@ -275,6 +285,12 @@ class ConfigAi implements ConfigAiInterface {
 		document.head.appendChild(style)
 	}
 
+	generateSelector(node) {
+		return finder(node.parentNode, {
+			optimizedMinLength: 2
+		})
+	}
+
 	scanPageForPII() {
 		try {
 			let pagePath = window.location.origin + window.location.pathname
@@ -283,8 +299,8 @@ class ConfigAi implements ConfigAiInterface {
 					let domItems = await this.#identifyPII(pagePath)
 					if (domItems.length > 0) {
 						this.#findNodesWithPII(domItems)
-						// domItems = domItems.filter((item) => !item.delete)
-						// domItems = await this.#generateSelectors(domItems)
+						domItems = domItems.filter((item) => !item.delete)
+						domItems = await this.#generateSelectors(domItems)
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
