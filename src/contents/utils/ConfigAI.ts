@@ -291,6 +291,22 @@ class ConfigAi implements ConfigAiInterface {
 		})
 	}
 
+	generateElementSelector(event: any) {
+		event.preventDefault()
+		const selector = finder(event.target)
+		console.log(`Clicked: ${event.target.innerText} | Selector: ${selector}`)
+	}
+
+	toggleDomListener(enable: boolean) {
+		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
+		let pagePath = window.location.origin + window.location.pathname
+		if (enable) {
+			document.addEventListener("click", this.generateElementSelector)
+		} else {
+			document.removeEventListener("click", this.generateElementSelector)
+		}
+	}
+
 	scanPageForPII() {
 		try {
 			let pagePath = window.location.origin + window.location.pathname

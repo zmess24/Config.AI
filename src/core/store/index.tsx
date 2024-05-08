@@ -5,6 +5,7 @@ import { FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE, RESYNC
 import { Storage } from "@plasmohq/storage"
 import reducer from "~core/reducers"
 import { persistConfig } from "./persistConfig"
+import { STATE_TYPES } from "./stateTypes"
 
 /**
 |--------------------------------------------------
@@ -43,25 +44,19 @@ const stateSyncMiddleware = (store) => (next) => (action) => {
 				name: "provider/disconnected"
 			})
 			break
-		case "session/startSession":
-			sendToBackground({
-				name: result.type
-			})
+		case STATE_TYPES.SESSION.START:
+			sendToBackground({ name: result.type })
 			break
-		case "session/endSession":
-			sendToBackground({
-				name: result.type
-			})
+		case STATE_TYPES.SESSION.END:
+			sendToBackground({ name: result.type })
 			break
-		case "session/resetSession":
-			sendToBackground({
-				name: result.type
-			})
+		case STATE_TYPES.SESSION.RESET:
+			sendToBackground({ name: result.type })
 			break
-		case "session/startDomListener":
+		case STATE_TYPES.SESSION.START_DOM_LISTENER:
 			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
 			break
-		case "session/endDomListener":
+		case STATE_TYPES.SESSION.END_DOM_LISTENER:
 			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
 			break
 		default:
