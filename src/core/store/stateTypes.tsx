@@ -7,7 +7,7 @@ export const STATE_TYPES = {
 		END_DOM_LISTENER: "session/endDomListener"
 	},
 	MODEL: {
-		CONNECTED: "providerConnected",
-		DISCONNECTED: "providerDisconnected"
+		CONNECTED: "models/modelAuthenticate/fulfilled",
+		DISCONNECTED: "models/disconnectProvider"
 	}
 }

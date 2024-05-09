@@ -33,25 +33,25 @@ const chromeStorageMiddleware = (store) => (next) => (action) => {
 const stateSyncMiddleware = (store) => (next) => (action) => {
 	const result = next(action)
 	switch (result.type) {
-		case "models/modelAuthenticate/fulfilled":
+		case STATE_TYPES.MODEL.CONNECTED:
 			sendToBackground({
 				name: "provider/connected",
 				body: result.payload.provider
 			})
 			break
-		case "models/disconnectProvider":
+		case STATE_TYPES.MODEL.DISCONNECTED:
 			sendToBackground({
 				name: "provider/disconnected"
 			})
 			break
 		case STATE_TYPES.SESSION.START:
-			sendToBackground({ name: result.type })
+			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
 			break
 		case STATE_TYPES.SESSION.END:
-			sendToBackground({ name: result.type })
+			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
 			break
 		case STATE_TYPES.SESSION.RESET:
-			sendToBackground({ name: result.type })
+			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
 			break
 		case STATE_TYPES.SESSION.START_DOM_LISTENER:
 			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })

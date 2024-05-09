@@ -13,8 +13,7 @@ export default function Router() {
 
 	useEffect(() => {
 		async function syncSessionState() {
-			console.log("Syncing session state!")
-			let res = await sendToContentScript({ name: "popupOpened" })
+			let res = await sendToContentScript({ name: "popupOpened", body: { type: "popupOpened" } })
 			if (res) dispatch(syncSession(res.recordedPages))
 		}
 

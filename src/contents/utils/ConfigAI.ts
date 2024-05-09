@@ -76,10 +76,15 @@ class ConfigAi implements ConfigAiInterface {
 
 	setIsOn(isOn: boolean) {
 		this.isOn = isOn
+		isOn ? print.log("Session Started", "#228B22") : print.log("Session Ended", "#850101")
 	}
 
 	setCache(updateType: "clear" | "update", payload?: CacheUpdatePayloadTypes) {
-		if (updateType === "clear") this.cache = {}
+		if (updateType === "clear") {
+			print.log("Resetting Session")
+			this.cache = {}
+			localStorage.removeItem("config.ai")
+		}
 
 		if (updateType === "update") {
 			let { detectedData, targetUrl, dataType } = payload
@@ -301,6 +306,7 @@ class ConfigAi implements ConfigAiInterface {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
 		let pagePath = window.location.origin + window.location.pathname
 		if (enable) {
+			document.body.style.cursor = "pointer"
 			document.addEventListener("click", this.generateElementSelector)
 		} else {
 			document.removeEventListener("click", this.generateElementSelector)
