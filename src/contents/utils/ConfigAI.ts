@@ -72,6 +72,7 @@ class ConfigAi implements ConfigAiInterface {
 
 	setProvider(provider: string) {
 		this.provider = provider
+		provider ? print.log(`Connected to Provider: ${provider}`, "#228B22") : print.log("Disconnected Provider", "#850101")
 	}
 
 	setIsOn(isOn: boolean) {

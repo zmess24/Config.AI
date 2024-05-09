@@ -1,5 +1,25 @@
-import { STATE_TYPES } from "~core/store/stateTypes"
+import { config } from "process"
 import { print } from "./print"
+
+/**
+|--------------------------------------------------
+| Message Types
+|--------------------------------------------------
+*/
+
+export const MESSAGE_TYPES = {
+	SESSION: {
+		START: "session/startSession",
+		END: "session/endSession",
+		RESET: "session/resetSession",
+		START_DOM_LISTENER: "session/startDomListener",
+		END_DOM_LISTENER: "session/endDomListener"
+	},
+	MODEL: {
+		CONNECTED: "models/modelAuthenticate/fulfilled",
+		DISCONNECTED: "models/disconnectProvider"
+	}
+}
 
 /**
 |--------------------------------------------------
@@ -23,20 +43,20 @@ export function initMessageHandlers(configAi) {
 	// Chrome Message Handler
 	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 		switch (message.body.type) {
-			case "providerConnected":
-				print.log(`Connected to Provider: ${message.body}`, "#228B22")
+			case MESSAGE_TYPES.MODEL.CONNECTED:
+				configAi.setProvider(message.body.payload.provider)
 				break
-			case "providerDisconnected":
-				print.log(`Disconnected from Provider`, "#850101")
+			case MESSAGE_TYPES.MODEL.DISCONNECTED:
+				configAi.setProvider(undefined)
 				break
-			case STATE_TYPES.SESSION.START:
+			case MESSAGE_TYPES.SESSION.START:
 				configAi.setIsOn(true)
 				configAi.scanPageForPII()
 				break
-			case STATE_TYPES.SESSION.END:
+			case MESSAGE_TYPES.SESSION.END:
 				configAi.setIsOn(false)
 				break
-			case STATE_TYPES.SESSION.RESET:
+			case MESSAGE_TYPES.SESSION.RESET:
 				configAi.setCache("clear")
 				break
 			case "piiStatus":

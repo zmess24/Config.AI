@@ -5,7 +5,6 @@ import { FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE, RESYNC
 import { Storage } from "@plasmohq/storage"
 import reducer from "~core/reducers"
 import { persistConfig } from "./persistConfig"
-import { STATE_TYPES } from "./stateTypes"
 
 /**
 |--------------------------------------------------
@@ -32,37 +31,7 @@ const chromeStorageMiddleware = (store) => (next) => (action) => {
 
 const stateSyncMiddleware = (store) => (next) => (action) => {
 	const result = next(action)
-	switch (result.type) {
-		case STATE_TYPES.MODEL.CONNECTED:
-			sendToBackground({
-				name: "provider/connected",
-				body: result.payload.provider
-			})
-			break
-		case STATE_TYPES.MODEL.DISCONNECTED:
-			sendToBackground({
-				name: "provider/disconnected"
-			})
-			break
-		case STATE_TYPES.SESSION.START:
-			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
-			break
-		case STATE_TYPES.SESSION.END:
-			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
-			break
-		case STATE_TYPES.SESSION.RESET:
-			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
-			break
-		case STATE_TYPES.SESSION.START_DOM_LISTENER:
-			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
-			break
-		case STATE_TYPES.SESSION.END_DOM_LISTENER:
-			sendToBackground({ name: "session/messageHandler", body: { type: result.type } })
-			break
-		default:
-			break
-	}
-
+	sendToBackground({ name: "session/messageHandler", body: { ...result } })
 	return result
 }
 
