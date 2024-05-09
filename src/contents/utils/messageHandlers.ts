@@ -52,6 +52,7 @@ export function initMessageHandlers(configAi) {
 				break
 			case MESSAGE_TYPES.SESSION.END:
 				configAi.setIsOn(false)
+				configAi.toggleDomListener(false)
 				break
 			case MESSAGE_TYPES.SESSION.RESET:
 				configAi.setCache("clear")
