@@ -1,6 +1,3 @@
-import { config } from "process"
-import { print } from "./print"
-
 /**
 |--------------------------------------------------
 | Message Types
@@ -36,7 +33,7 @@ export function initMessageHandlers(configAi) {
 	// Window Message Handler
 	window.addEventListener("message", (event) => {
 		if (event.source === window && event.data.type === "routeChange") {
-			configAi.scanPageForPII()
+			// configAi.scanPageForPII()
 		}
 	})
 
@@ -51,7 +48,7 @@ export function initMessageHandlers(configAi) {
 				break
 			case MESSAGE_TYPES.SESSION.START:
 				configAi.setIsOn(true)
-				configAi.scanPageForPII()
+				// configAi.scanPageForPII()
 				break
 			case MESSAGE_TYPES.SESSION.END:
 				configAi.setIsOn(false)
@@ -59,11 +56,15 @@ export function initMessageHandlers(configAi) {
 			case MESSAGE_TYPES.SESSION.RESET:
 				configAi.setCache("clear")
 				break
+			case MESSAGE_TYPES.SESSION.START_DOM_LISTENER:
+				configAi.toggleDomListener(true)
+				break
+			case MESSAGE_TYPES.SESSION.END_DOM_LISTENER:
+				configAi.toggleDomListener(false)
+				break
 			case "piiStatus":
-				print.log(`PII Remediation Status: ${message.body.status}`, "#850101")
 				break
 			case "popupOpened":
-				print.log("Popup Opened")
 				sendResponse({ recordedPages: configAi.cache })
 				break
 			default:

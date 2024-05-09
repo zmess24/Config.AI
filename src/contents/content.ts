@@ -31,7 +31,7 @@ async function main() {
 	// Scan the page for PII
 	// configAi.scanPageForPII()
 	// Inject CSS sheet
-	// configAi.injectCSS()
+	configAi.injectCSS()
 }
 
 main()

@@ -287,6 +287,29 @@ class ConfigAi implements ConfigAiInterface {
 				font-size: 10px;
 				font-weight: bold;
 			}
+			.inspect-overlay {
+				position: absolute;
+				background-color: rgba(0, 0, 0, 0.7);
+				color: white;
+				padding: 5px;
+				font-size: 12px;
+				pointer-events: none;
+				display: none;
+				z-index: 9999;
+			  }
+			  .inspect-toaster {
+				position: absolute;
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 8px;
+				font-size: 14px;
+				pointer-events: none;
+				display: none;
+				z-index: 9999;
+				border-radius: 4px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+				white-space: nowrap;
+			  }
 `
 		document.head.appendChild(style)
 	}
@@ -299,17 +322,77 @@ class ConfigAi implements ConfigAiInterface {
 
 	generateElementSelector(event: any) {
 		event.preventDefault()
-		const selector = finder(event.target)
-		console.log(`Clicked: ${event.target.innerText} | Selector: ${selector}`)
+		let selector = finder(event.target)
+		console.log(selector)
+	}
+
+	createInspectOverlay() {
+		// Overlay for inspecting elements
+		const inspectOverlay = document.createElement("div") as HTMLElement
+		inspectOverlay.className = "inspect-overlay"
+		document.body.appendChild(inspectOverlay)
+		// Toaster for inspecting elements
+		const inspectToaster = document.createElement("div") as HTMLElement
+		inspectToaster.className = "inspect-toaster"
+		document.body.appendChild(inspectToaster)
+	}
+
+	removeInspectOverlay() {
+		// Overlay for inspecting elements
+		const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
+		document.body.removeChild(inspectOverlay)
+		// Toaster for inspecting elements
+		const inspectToaster = document.querySelector(".inspect-toaster") as HTMLElement
+		document.body.removeChild(inspectToaster)
+	}
+
+	handleInspectOverlayHover(event: any) {
+		const target = event.target
+		const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
+		const inspectToaster = document.querySelector(".inspect-toaster") as HTMLElement
+		// Get the bounding rectangle of the target element
+		const rect = target.getBoundingClientRect()
+
+		// Set the position and size of the inspect overlay
+		inspectOverlay.style.top = `${rect.top + window.scrollY}px`
+		inspectOverlay.style.left = `${rect.left + window.scrollX}px`
+		inspectOverlay.style.width = `${rect.width}px`
+		inspectOverlay.style.height = `${rect.height}px`
+
+		// Display the tag name and class of the target element
+		// inspectOverlay.textContent = `<${target.tagName.toLowerCase()}>`
+		// if (target.className) {
+		// 	inspectOverlay.textContent += ` .${target.className}`
+		// }
+
+		// Set the position of the inspect toaster
+		inspectToaster.style.top = `${rect.bottom + window.scrollY + 10}px`
+		inspectToaster.style.left = `${rect.left + window.scrollX}px`
+
+		// Display the tag name and class of the target element
+		inspectToaster.textContent = `<${target.tagName.toLowerCase()}>`
+		if (target.className) {
+			inspectToaster.textContent += ` .${target.className}`
+		}
+
+		// Show the inspect overlay
+		inspectToaster.style.display = "block"
+		inspectOverlay.style.display = "block"
 	}
 
 	toggleDomListener(enable: boolean) {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
 		let pagePath = window.location.origin + window.location.pathname
 		if (enable) {
-			document.body.style.cursor = "pointer"
+			this.createInspectOverlay()
+			document.addEventListener("mousemove", this.handleInspectOverlayHover)
 			document.addEventListener("click", this.generateElementSelector)
 		} else {
+			document.addEventListener("mouseleave", () => {
+				const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
+				inspectOverlay.style.display = "none"
+			})
+			this.removeInspectOverlay()
 			document.removeEventListener("click", this.generateElementSelector)
 		}
 	}
