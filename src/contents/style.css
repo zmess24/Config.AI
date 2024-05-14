@@ -5,10 +5,6 @@
 	transition-duration: 500ms;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* overlay.css */
 .configai-overlay {
 	position: absolute;

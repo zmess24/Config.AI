@@ -22,7 +22,7 @@ const modelMap = [
 		name: "GPT-4",
 		image: openaiLogo,
 		initModel: function (apiKey) {
-			let model = new ChatOpenAI({ apiKey, model: "gpt-4" })
+			let model = new ChatOpenAI({ apiKey, model: "gpt-4o" })
 			return model
 		},
 		invokeChain: async function (model, name, promptArguments) {

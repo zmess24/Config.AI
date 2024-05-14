@@ -91,6 +91,7 @@ class ConfigAi implements ConfigAiInterface {
 			let { detectedData, targetUrl, dataType } = payload
 			if (!this.cache[targetUrl]) this.cache[targetUrl] = { domItems: [], apiItems: [] }
 			this.cache[targetUrl][dataType] = [...this.cache[targetUrl][dataType], ...detectedData]
+			print.table("Cache Updated", detectedData)
 			localStorage.setItem("config.ai", JSON.stringify(this.cache))
 		}
 	}
@@ -223,24 +224,9 @@ class ConfigAi implements ConfigAiInterface {
     |--------------------------------------------------
     */
 
-	async #identifyPII(pagePath: string) {
-		print.log(`Scanning ${pagePath}`, "#228B22")
-		let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
-		const { result } = await sendToBackground({
-			name: "pii/identify",
-			body: { pageText }
-		})
-
-		return result.domItems
-	}
-
-	async #generateSelectors(domItems: Array<object>) {
-		print.table(`Refining Selectors`, domItems)
-		const { result } = await sendToBackground({
-			name: "pii/refine",
-			body: { domItems }
-		})
-
+	async #sendToBackground(message: string, { name, body }) {
+		print.log(`${message}`)
+		const { result } = await sendToBackground({ name, body })
 		return result.domItems
 	}
 
@@ -254,63 +240,64 @@ class ConfigAi implements ConfigAiInterface {
 		const style = document.createElement("style")
 		style.id = "config-ai"
 		style.textContent = `
-			.configai-overlay {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				background: rgb(165 180 252);
-				z-index: 1000;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				color: white;
-				font-size: 10px;
-				transition: all 0.5s ease-in;
-				border: 2px solid #4338ca;
-				opacity: 0.8;
-				padding: 2px;
-			}
-			.configai-close-button {
-				position: absolute;
-				top: 10px;
-				right: 10px;
-				cursor: pointer;
-				background: #444;
-				color: white;
-				width: 5px;
-				height: 5px;
-				line-height: 5px;
-				text-align: center;
-				border-radius: 5px;
-				font-size: 10px;
-				font-weight: bold;
-			}
-			.inspect-overlay {
-				position: absolute;
-				background-color: rgba(0, 0, 0, 0.7);
-				color: white;
-				padding: 5px;
-				font-size: 12px;
-				pointer-events: none;
-				display: none;
-				z-index: 9999;
-			  }
-			  .inspect-toaster {
-				position: absolute;
-				background-color: rgba(0, 0, 0, 0.8);
-				color: white;
-				padding: 8px;
-				font-size: 14px;
-				pointer-events: none;
-				display: none;
-				z-index: 9999;
-				border-radius: 4px;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-				white-space: nowrap;
-			  }
-`
+		  .configai-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgb(165 180 252);
+			z-index: 1000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			color: white;
+			font-size: 10px;
+			transition: all 0.5s ease-in;
+			border: 2px solid #4338ca;
+			opacity: 0.8;
+			padding: 2px;
+		  }
+		  .configai-close-button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			cursor: pointer;
+			background: #444;
+			color: white;
+			width: 15px;
+			height: 15px;
+			line-height: 15px;
+			text-align: center;
+			border-radius: 50%;
+			font-size: 12px;
+			font-weight: bold;
+			user-select: none;
+		  }
+		  .inspect-overlay {
+			position: absolute;
+			background-color: rgba(0, 0, 0, 0.7);
+			color: white;
+			padding: 5px;
+			font-size: 12px;
+			pointer-events: none;
+			display: none;
+			z-index: 9999;
+		  }
+		  .inspect-toaster {
+			position: absolute;
+			background-color: rgba(0, 0, 0, 0.8);
+			color: white;
+			padding: 8px;
+			font-size: 14px;
+			pointer-events: none;
+			display: none;
+			z-index: 9999;
+			border-radius: 4px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+			white-space: nowrap;
+		  }
+		`
 		document.head.appendChild(style)
 	}
 
@@ -320,10 +307,39 @@ class ConfigAi implements ConfigAiInterface {
 		})
 	}
 
-	generateElementSelector(event: any) {
+	pinOverlayToElement(target) {
+		const overlay = document.createElement("div")
+		overlay.className = "configai-overlay"
+
+		const rect = target.getBoundingClientRect()
+		overlay.style.top = `${rect.top + window.scrollY}px`
+		overlay.style.left = `${rect.left + window.scrollX}px`
+		overlay.style.width = `${rect.width}px`
+		overlay.style.height = `${rect.height}px`
+
+		overlay.textContent = `<${target.tagName.toLowerCase()}>`
+		if (target.className) {
+			overlay.textContent += ` .${target.className}`
+		}
+
+		this.addCloseButton(overlay)
+		document.body.appendChild(overlay)
+	}
+
+	generateElementSelector(event) {
 		event.preventDefault()
-		let selector = finder(event.target)
+		const target = event.target
+
+		// Prevent default behavior for certain elements like links
+		if (["A", "BUTTON", "INPUT"].includes(target.tagName)) {
+			event.stopImmediatePropagation()
+		}
+
+		let selector = finder(target)
 		console.log(selector)
+
+		// Pin the overlay to the selected element
+		this.pinOverlayToElement(target)
 	}
 
 	createInspectOverlay() {
@@ -335,6 +351,16 @@ class ConfigAi implements ConfigAiInterface {
 		const inspectToaster = document.createElement("div") as HTMLElement
 		inspectToaster.className = "inspect-toaster"
 		document.body.appendChild(inspectToaster)
+	}
+
+	addCloseButton(overlay) {
+		const closeButton = document.createElement("div")
+		closeButton.className = "configai-close-button"
+		closeButton.textContent = "X"
+		closeButton.onclick = function () {
+			overlay.remove()
+		}
+		overlay.appendChild(closeButton)
 	}
 
 	removeInspectOverlay() {
@@ -402,11 +428,13 @@ class ConfigAi implements ConfigAiInterface {
 			let pagePath = window.location.origin + window.location.pathname
 			if (this.isOn && !this.cache[pagePath]) {
 				setTimeout(async () => {
-					let domItems = await this.#identifyPII(pagePath)
+					let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
+					let domItems = await this.#sendToBackground(`Scanning ${pagePath}`, { name: "pii/identify", body: { pageText } })
+
 					if (domItems.length > 0) {
 						this.#findNodesWithPII(domItems)
 						domItems = domItems.filter((item) => !item.delete)
-						domItems = await this.#generateSelectors(domItems)
+						domItems = await this.#sendToBackground(`Refining Selectors for ${pagePath}`, { name: "pii/refine", body: { domItems } })
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)

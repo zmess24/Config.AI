@@ -29,7 +29,7 @@ async function main() {
 	// Initialize the Message Listeners
 	initMessageHandlers(configAi)
 	// Scan the page for PII
-	// configAi.scanPageForPII()
+	configAi.scanPageForPII()
 	// Inject CSS sheet
 	configAi.injectCSS()
 }
