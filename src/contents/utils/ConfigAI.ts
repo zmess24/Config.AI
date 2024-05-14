@@ -227,6 +227,7 @@ class ConfigAi implements ConfigAiInterface {
 	async #sendToBackground(message: string, { name, body }) {
 		print.log(`${message}`)
 		const { result } = await sendToBackground({ name, body })
+		console.log(result.domItems)
 		return result.domItems
 	}
 
