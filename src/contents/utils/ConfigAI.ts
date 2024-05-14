@@ -23,6 +23,7 @@ interface DomItemTypes {
 	value: string
 	selector: string
 	refinedSelector?: string
+	delete?: boolean
 }
 
 interface CacheUpdatePayloadTypes {
@@ -108,18 +109,16 @@ class ConfigAi implements ConfigAiInterface {
 		return document.createTreeWalker(document.body, nodeFilter, null)
 	}
 
-	#findNodesWithPII(piiList) {
-		const textNodes = []
+	#findNodesWithPII(domItems: Array<DomItemTypes>) {
 		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
 		let node
 
 		while ((node = walker.nextNode())) {
-			piiList.forEach((data) => {
-				if (node.textContent.includes(data.value) && node.parentNode.nodeName !== "SCRIPT") {
+			domItems.forEach((data) => {
+				let nodeText = node.textContent.toLowerCase()
+				if (nodeText.includes(data.value.toLowerCase()) && !["SCRIPT", "INPUT"].includes(node.parentNode.nodeName)) {
 					if (node.parentNode.nodeName !== "LABEL") {
-						data.selector = finder(node.parentNode, {
-							optimizedMinLength: 2
-						})
+						data.selector = finder(node.parentNode, { optimizedMinLength: 2 })
 					} else {
 						data.delete = true
 					}
@@ -127,7 +126,7 @@ class ConfigAi implements ConfigAiInterface {
 			})
 		}
 
-		return textNodes
+		return domItems.filter((item: DomItemTypes) => !item.delete)
 	}
 
 	#highlightNodesWithPII(domItems) {
@@ -348,11 +347,6 @@ class ConfigAi implements ConfigAiInterface {
 		overlay.style.width = `${rect.width}px`
 		overlay.style.height = `${rect.height}px`
 
-		overlay.textContent = `<${target.tagName.toLowerCase()}>`
-		if (target.className) {
-			overlay.textContent += ` .${target.className}`
-		}
-
 		// this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
 
@@ -450,8 +444,7 @@ class ConfigAi implements ConfigAiInterface {
 					let domItems = await this.#sendToBackground(`Scanning ${pagePath}`, { name: "pii/identify", body: { pageText } })
 
 					if (domItems.length > 0) {
-						this.#findNodesWithPII(domItems)
-						domItems = domItems.filter((item) => !item.delete)
+						domItems = this.#findNodesWithPII(domItems)
 						domItems = await this.#sendToBackground(`Refining Selectors for ${pagePath}`, { name: "pii/refine", body: { domItems } })
 					}
 					domItems = this.#findInputFields(domItems)
