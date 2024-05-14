@@ -4,7 +4,8 @@ import type { SessionStateTypes } from "~core/types"
 const initialState: SessionStateTypes = {
 	recordedPages: {},
 	isOn: false,
-	domListenerOn: false
+	domListenerOn: false,
+	host: undefined
 }
 
 const sessionSlice = createSlice({
@@ -17,8 +18,9 @@ const sessionSlice = createSlice({
 		endSession: (state) => {
 			state.isOn = false
 		},
-		syncSession: (state, action) => {
-			state.recordedPages = action.payload
+		syncSession: (state, { payload }) => {
+			state.recordedPages = payload.recordedPages
+			state.host = payload.host
 		},
 		resetSession: (state) => {
 			state.recordedPages = {}
@@ -28,10 +30,13 @@ const sessionSlice = createSlice({
 		},
 		endDomListener: (state) => {
 			state.domListenerOn = false
+		},
+		setHost: (state, action) => {
+			state.host = action.payload
 		}
 	}
 })
 
-export const { startSession, endSession, syncSession, resetSession, startDomListener, endDomListener } = sessionSlice.actions
+export const { startSession, endSession, syncSession, resetSession, startDomListener, endDomListener, setHost } = sessionSlice.actions
 
 export default sessionSlice.reducer

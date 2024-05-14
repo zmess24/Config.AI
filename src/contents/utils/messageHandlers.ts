@@ -33,7 +33,7 @@ export function initMessageHandlers(configAi) {
 	// Window Message Handler
 	window.addEventListener("message", (event) => {
 		if (event.source === window && event.data.type === "routeChange") {
-			// configAi.scanPageForPII()
+			configAi.scanPageForPII()
 		}
 	})
 
@@ -48,7 +48,7 @@ export function initMessageHandlers(configAi) {
 				break
 			case MESSAGE_TYPES.SESSION.START:
 				configAi.setIsOn(true)
-				// configAi.scanPageForPII()
+				configAi.scanPageForPII()
 				break
 			case MESSAGE_TYPES.SESSION.END:
 				configAi.setIsOn(false)
@@ -66,7 +66,7 @@ export function initMessageHandlers(configAi) {
 			case "piiStatus":
 				break
 			case "popupOpened":
-				sendResponse({ recordedPages: configAi.cache })
+				sendResponse({ recordedPages: configAi.cache, host: configAi.host })
 				break
 			default:
 				break

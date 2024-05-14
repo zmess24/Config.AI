@@ -11,7 +11,7 @@ import Stat from "./components/Stat"
 export default function DashboardView() {
 	const dispatch: AppDispatch = useDispatch()
 	const { recordedPages } = useSelector((state: RootState) => state.session)
-	const { domListenerOn, isOn } = useSelector((state: RootState) => state.session)
+	const { domListenerOn, isOn, host } = useSelector((state: RootState) => state.session)
 	const provider = useSelector((state: RootState) => state.models.provider)
 
 	const handleSessionStart = (e) => {
@@ -52,6 +52,9 @@ export default function DashboardView() {
 		<Layout>
 			<Section>
 				<Header text={"Identified PII & PCI"} OptionalIcon={NoSymbolIcon} iconClickHandler={handleResetSession} />
+				<p className="text-center">
+					<strong>{host}</strong>
+				</p>
 				<p className="text-center">
 					Unique Pages Visited: <strong>{pageCount}</strong>
 				</p>

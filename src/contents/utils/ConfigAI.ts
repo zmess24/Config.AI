@@ -48,14 +48,16 @@ interface NodeToAdd {
 class ConfigAi implements ConfigAiInterface {
 	provider: string
 	isOn: boolean
+	host: string | undefined
 	nonTextBasedSelectors: string
 	inputTypes: string
 	cache: object
 	nodesToAdd: Array<NodeToAdd>
 
-	constructor(provider: string, isOn: boolean) {
+	constructor(provider: string, isOn: boolean, host: string) {
 		this.provider = provider
-		this.isOn = isOn
+		this.isOn = window.location.host === host ? isOn : false
+		this.host = window.location.host
 		this.cache = JSON.parse(window.localStorage.getItem("config.ai") || "{}")
 		this.nonTextBasedSelectors = "script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
 		this.inputTypes = "input, textarea, select, label, option"
@@ -323,7 +325,7 @@ class ConfigAi implements ConfigAiInterface {
 			overlay.textContent += ` .${target.className}`
 		}
 
-		this.addCloseButton(overlay)
+		// this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
 	}
 
@@ -337,10 +339,25 @@ class ConfigAi implements ConfigAiInterface {
 		}
 
 		let selector = finder(target)
-		console.log(selector)
+		const overlay = document.createElement("div")
+		overlay.className = "configai-overlay"
+
+		const rect = target.getBoundingClientRect()
+		overlay.style.top = `${rect.top + window.scrollY}px`
+		overlay.style.left = `${rect.left + window.scrollX}px`
+		overlay.style.width = `${rect.width}px`
+		overlay.style.height = `${rect.height}px`
+
+		overlay.textContent = `<${target.tagName.toLowerCase()}>`
+		if (target.className) {
+			overlay.textContent += ` .${target.className}`
+		}
+
+		// this.addCloseButton(overlay)
+		document.body.appendChild(overlay)
 
 		// Pin the overlay to the selected element
-		this.pinOverlayToElement(target)
+		// this.pinOverlayToElement(target)
 	}
 
 	createInspectOverlay() {
