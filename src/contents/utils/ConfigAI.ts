@@ -330,6 +330,15 @@ class ConfigAi implements ConfigAiInterface {
 
 		// this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
+		this.nodesToAdd.push({
+			selector,
+			type: "",
+			typeOfInformation: "",
+			confidence: "High",
+			value: event.target.innerText
+		})
+
+		console.log(this.nodesToAdd)
 		// Prevents default click behavior
 		return false
 	}
@@ -391,23 +400,29 @@ class ConfigAi implements ConfigAiInterface {
 		}
 	}
 
-	toggleDomListener(enable: boolean) {
+	async toggleDomListener(enable: boolean) {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
+		let generateElementSelector = this.generateElementSelector.bind(this)
 		let pagePath = window.location.origin + window.location.pathname
 		if (enable) {
-			// Prevent navigation on link clicks
-			document.addEventListener("click", this.disableLinkClicks, true)
-			// Create inspect overlay element
+			// Add Event Listeners & Overlay
 			this.createInspectOverlay()
+			document.addEventListener("click", this.disableLinkClicks, true)
 			document.addEventListener("mousemove", this.handleInspectOverlayHover)
-			document.addEventListener("click", this.generateElementSelector, true)
+			document.addEventListener("click", generateElementSelector, true)
 		} else {
-			// Enable navigation on link clicks
-			document.removeEventListener("click", this.disableLinkClicks, true)
-			// Remove inspect overlay element
+			// Remove Event Listeners & Overlay
 			this.removeInspectOverlay()
+			document.removeEventListener("click", this.disableLinkClicks, true)
 			document.removeEventListener("mousemove", this.handleInspectOverlayHover)
-			document.removeEventListener("click", this.generateElementSelector, true)
+			document.removeEventListener("click", generateElementSelector, true)
+			// Process Selectors
+			if (this.nodesToAdd.length > 0) {
+				let domItems = await this.#sendToBackground(`Refining Selectors for ${pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
+				this.cache[pagePath].domItems = [...this.cache[pagePath].domItems, ...domItems]
+				this.setCache("update", { detectedData: this.cache[pagePath].domItems, pagePath, dataType: "domItems" })
+			}
+			this.nodesToAdd = []
 		}
 	}
 
