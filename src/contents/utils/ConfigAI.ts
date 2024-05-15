@@ -28,7 +28,7 @@ interface DomItemTypes {
 
 interface CacheUpdatePayloadTypes {
 	detectedData: Array<DomItemTypes>
-	targetUrl: string
+	pagePath: string
 	dataType: string
 }
 
@@ -85,18 +85,52 @@ class ConfigAi implements ConfigAiInterface {
 
 	setCache(updateType: "clear" | "update", payload?: CacheUpdatePayloadTypes) {
 		if (updateType === "clear") {
-			print.log("Resetting Session")
 			this.cache = {}
 			localStorage.removeItem("config.ai")
+			print.log("Session Reset")
 		}
 
 		if (updateType === "update") {
-			let { detectedData, targetUrl, dataType } = payload
-			if (!this.cache[targetUrl]) this.cache[targetUrl] = { domItems: [], apiItems: [] }
-			this.cache[targetUrl][dataType] = [...this.cache[targetUrl][dataType], ...detectedData]
-			print.table("Cache Updated", detectedData)
+			let { detectedData, pagePath, dataType } = payload
+			if (!this.cache[pagePath]) this.cache[pagePath] = { domItems: [], apiItems: [] }
+			this.cache[pagePath][dataType] = [...detectedData]
 			localStorage.setItem("config.ai", JSON.stringify(this.cache))
+			print.table("Cache Updated", detectedData)
 		}
+	}
+
+	/**
+    |--------------------------------------------------
+    | Overlay Functions
+    |--------------------------------------------------
+    */
+
+	createOverlay(targetElement, selector) {
+		// Create an overlay element
+		const overlay = document.createElement("div.")
+		overlay.className = "configai-overlay"
+		// Create a close button and append it to the overlay
+		let closeButton = this.addCloseButton(overlay)
+		let pagePath = window.location.origin + window.location.pathname
+		closeButton.onclick = () => {
+			console.log(pagePath, this.cache[pagePath].domItems)
+			let detectedData = this.cache[pagePath].domItems.filter((item) => item.selector !== selector)
+			this.setCache("update", { detectedData, pagePath, dataType: "domItems" })
+			overlay.remove()
+		}
+		// Append the overlay to the target element
+		targetElement.style.position = "relative" // Ensure the target can hold absolute positioned children
+		targetElement.appendChild(overlay)
+	}
+
+	addCloseButton(overlay) {
+		// Create a close button element
+		const closeButton = document.createElement("div")
+		closeButton.className = "configai-close-button"
+		closeButton.textContent = "x"
+		// Append the overlay to the target element
+		overlay.appendChild(closeButton)
+		return closeButton
 	}
 
 	/**
@@ -130,33 +164,8 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#highlightNodesWithPII(domItems) {
-		function createOverlay(targetElement, selector) {
-			const overlay = document.createElement("div")
-			overlay.className = "configai-overlay"
-			overlay.textContent = selector
-
-			// Create a close button and append it to the overlay
-			const closeButton = document.createElement("div")
-			closeButton.className = "configai-close-button"
-			closeButton.textContent = "X" // Text for the close button
-			closeButton.onclick = function () {
-				removeOverlay(overlay)
-			}
-
-			// Append the close button and the overlay text or content
-			overlay.appendChild(closeButton)
-
-			// Append the overlay to the target element
-			targetElement.style.position = "relative" // Ensure the target can hold absolute positioned children
-			targetElement.appendChild(overlay)
-
-			// Optionally store the overlay for later removal
-			return overlay
-		}
-
-		function removeOverlay(overlay) {
-			overlay.parentNode.removeChild(overlay)
-		}
+		// Bind the current instance of the class to the function
+		let createOverlay = this.createOverlay.bind(this)
 
 		domItems.forEach((data) => {
 			const elements = document.querySelectorAll(data.selector)
@@ -262,8 +271,8 @@ class ConfigAi implements ConfigAiInterface {
 		  }
 		  .configai-close-button {
 			position: absolute;
-			top: 10px;
-			right: 10px;
+			top: -10px;
+			right: -10px;
 			cursor: pointer;
 			background: #444;
 			color: white;
@@ -272,7 +281,7 @@ class ConfigAi implements ConfigAiInterface {
 			line-height: 15px;
 			text-align: center;
 			border-radius: 50%;
-			font-size: 12px;
+			font-size: 9px;
 			font-weight: bold;
 			user-select: none;
 		  }
@@ -345,16 +354,6 @@ class ConfigAi implements ConfigAiInterface {
 		if (inspectToaster) document.body.removeChild(inspectToaster)
 	}
 
-	addCloseButton(overlay) {
-		const closeButton = document.createElement("div")
-		closeButton.className = "configai-close-button"
-		closeButton.textContent = "X"
-		closeButton.onclick = function () {
-			overlay.remove()
-		}
-		overlay.appendChild(closeButton)
-	}
-
 	handleInspectOverlayHover(event: any) {
 		const target = event.target
 		const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
@@ -367,12 +366,6 @@ class ConfigAi implements ConfigAiInterface {
 		inspectOverlay.style.left = `${rect.left + window.scrollX}px`
 		inspectOverlay.style.width = `${rect.width}px`
 		inspectOverlay.style.height = `${rect.height}px`
-
-		// Display the tag name and class of the target element
-		// inspectOverlay.textContent = `<${target.tagName.toLowerCase()}>`
-		// if (target.className) {
-		// 	inspectOverlay.textContent += ` .${target.className}`
-		// }
 
 		// Set the position of the inspect toaster
 		inspectToaster.style.top = `${rect.bottom + window.scrollY + 10}px`
@@ -432,7 +425,7 @@ class ConfigAi implements ConfigAiInterface {
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
-					this.setCache("update", { detectedData: domItems, targetUrl: pagePath, dataType: "domItems" })
+					this.setCache("update", { detectedData: domItems, pagePath, dataType: "domItems" })
 				}, 3000)
 			} else if (this.isOn) {
 				setTimeout(async () => {
