@@ -1,4 +1,4 @@
-import { CloudIcon, CodeBracketSquareIcon, NoSymbolIcon } from "@heroicons/react/24/solid"
+import { CloudIcon, CodeBracketSquareIcon, DocumentTextIcon, NoSymbolIcon, PencilIcon } from "@heroicons/react/24/solid"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "~core/reducers"
 import { endDomListener, endSession, resetSession, startDomListener, startSession } from "~core/reducers/sessionSlice"
@@ -39,12 +39,11 @@ export default function DashboardView() {
 	}
 
 	let domItemCount = 0
-	let apiItemCount = 0
+	let inputItemCount = 0
 	let pageCount = 0
 
 	for (let url in recordedPages) {
-		domItemCount += recordedPages[url].domItems.length
-		apiItemCount += recordedPages[url].apiItems.length
+		recordedPages[url].domItems.forEach((item) => (item.typeOfInformation === "Input" ? inputItemCount++ : domItemCount++))
 		pageCount++
 	}
 
@@ -59,8 +58,8 @@ export default function DashboardView() {
 					Unique Pages Visited: <strong>{pageCount}</strong>
 				</p>
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
-					<Stat Icon={CodeBracketSquareIcon} title={"DOM"} value={domItemCount} />
-					<Stat Icon={CloudIcon} title={"API"} value={apiItemCount} />
+					<Stat Icon={DocumentTextIcon} title={"Text"} value={domItemCount} />
+					<Stat Icon={PencilIcon} title={"Inputs"} value={inputItemCount} />
 				</dl>
 			</Section>
 

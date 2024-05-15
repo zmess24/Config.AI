@@ -307,30 +307,7 @@ class ConfigAi implements ConfigAiInterface {
 		return finder(node.parentNode, { optimizedMinLength: 2 })
 	}
 
-	pinOverlayToElement(target) {
-		const overlay = document.createElement("div")
-		overlay.className = "configai-overlay"
-
-		const rect = target.getBoundingClientRect()
-		overlay.style.top = `${rect.top + window.scrollY}px`
-		overlay.style.left = `${rect.left + window.scrollX}px`
-		overlay.style.width = `${rect.width}px`
-		overlay.style.height = `${rect.height}px`
-
-		overlay.textContent = `<${target.tagName.toLowerCase()}>`
-		if (target.className) {
-			overlay.textContent += ` .${target.className}`
-		}
-
-		// this.addCloseButton(overlay)
-		document.body.appendChild(overlay)
-	}
-
 	generateElementSelector(event) {
-		// Stop navigation if 'a' tag is clicked
-		const link = event.target.closest("a")
-		if (link) event.preventDefault() && event.stopPropagation()
-
 		let selector = finder(event.target, { optimizedMinLength: 2 })
 		// Create Overlapy
 		const overlay = document.createElement("div")
@@ -359,6 +336,15 @@ class ConfigAi implements ConfigAiInterface {
 		document.body.appendChild(inspectToaster)
 	}
 
+	removeInspectOverlay() {
+		// Overlay for inspecting elements
+		const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
+		if (inspectOverlay) document.body.removeChild(inspectOverlay)
+		// Toaster for inspecting elements
+		const inspectToaster = document.querySelector(".inspect-toaster") as HTMLElement
+		if (inspectToaster) document.body.removeChild(inspectToaster)
+	}
+
 	addCloseButton(overlay) {
 		const closeButton = document.createElement("div")
 		closeButton.className = "configai-close-button"
@@ -367,15 +353,6 @@ class ConfigAi implements ConfigAiInterface {
 			overlay.remove()
 		}
 		overlay.appendChild(closeButton)
-	}
-
-	removeInspectOverlay() {
-		// Overlay for inspecting elements
-		const inspectOverlay = document.querySelector(".inspect-overlay") as HTMLElement
-		if (inspectOverlay) document.body.removeChild(inspectOverlay)
-		// Toaster for inspecting elements
-		const inspectToaster = document.querySelector(".inspect-toaster") as HTMLElement
-		if (inspectToaster) document.body.removeChild(inspectToaster)
 	}
 
 	handleInspectOverlayHover(event: any) {
@@ -415,7 +392,6 @@ class ConfigAi implements ConfigAiInterface {
 	disableLinkClicks(e) {
 		// Determine if clicked element is an anchor tag
 		const link = e.target.closest("a")
-
 		if (link) {
 			e.preventDefault()
 			e.stopPropagation()
