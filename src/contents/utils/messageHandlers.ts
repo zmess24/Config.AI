@@ -33,6 +33,7 @@ export function initMessageHandlers(configAi) {
 	// Window Message Handler
 	window.addEventListener("message", (event) => {
 		if (event.source === window && event.data.type === "routeChange") {
+			configAi.toggleDomListener(false)
 			configAi.scanPageForPII()
 		}
 	})

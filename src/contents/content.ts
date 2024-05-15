@@ -28,6 +28,7 @@ async function main() {
 	const configAi = new ConfigAi(provider, isOn, host)
 	// Initialize the Message Listeners
 	initMessageHandlers(configAi)
+	// configAi.toggleDomListener(false)
 	// Scan the page for PII
 	configAi.scanPageForPII()
 	// Inject CSS sheet
