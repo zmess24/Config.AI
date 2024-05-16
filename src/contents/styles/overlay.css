@@ -79,3 +79,47 @@
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 	white-space: nowrap;
 }
+
+/* Popup overlay */
+.popup-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 10000;
+}
+
+/* Popup content */
+.popup-content {
+	background: white;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+	text-align: center;
+	z-index: 99999;
+}
+
+/* Loading icon */
+.loading-icon {
+	margin-top: 10px;
+	border: 4px solid #f3f3f3;
+	border-top: 4px solid #3498db;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

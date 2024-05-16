@@ -331,6 +331,24 @@ class ConfigAi implements ConfigAiInterface {
 		if (link) e.preventDefault()
 	}
 
+	showLoadingPopup() {
+		const overlay = document.createElement("div")
+		overlay.classList.add("popup-overlay")
+		overlay.innerHTML = `
+		  <div class="popup-content">
+			<p>Loading...</p>
+			<div class="loading-icon"></div>
+		  </div>
+		`
+		document.body.appendChild(overlay)
+		debugger
+		return overlay
+	}
+
+	hideLoadingPopup(overlay) {
+		if (overlay) overlay.remove()
+	}
+
 	async toggleDomListener(enable: boolean) {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
 
@@ -366,6 +384,7 @@ class ConfigAi implements ConfigAiInterface {
 		try {
 			if (this.isOn && !this.cache[this.pagePath]) {
 				setTimeout(async () => {
+					const loadingOverlay = this.showLoadingPopup()
 					let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
 					let domItems = await this.#sendToBackground(`Scanning ${this.pagePath}`, { name: "pii/identify", body: { pageText } })
 
@@ -376,17 +395,21 @@ class ConfigAi implements ConfigAiInterface {
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
 					this.setCache("update", { detectedData: domItems, pagePath: this.pagePath, dataType: "domItems" })
+					this.hideLoadingPopup(loadingOverlay)
 				}, 3000)
 			} else if (this.isOn) {
 				setTimeout(async () => {
+					const loadingOverlay = this.showLoadingPopup()
 					let domItems = this.cache[this.pagePath].domItems
 					this.#highlightNodesWithPII(domItems)
 					print.table("PII/PCI Found", domItems)
+					this.hideLoadingPopup(loadingOverlay)
 				}, 3000)
 			}
 		} catch (err) {
 			print.log(`Error Message: ${err.message}`)
 		}
+		// this.hideLoadingPopup(loadingOverlay)
 	}
 }
 

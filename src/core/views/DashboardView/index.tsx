@@ -51,10 +51,10 @@ export default function DashboardView() {
 		<Layout>
 			<Section>
 				<Header text={"Identified PII & PCI"} OptionalIcon={NoSymbolIcon} iconClickHandler={handleResetSession} />
-				<p className="text-center">
+				<p className="text-center text-sm">
 					<strong>{host}</strong>
 				</p>
-				<p className="text-center">
+				<p className="text-center text-xs">
 					Unique Pages Visited: <strong>{pageCount}</strong>
 				</p>
 				<dl className="mt-5 grid grid-cols-2 justify-items-center">
