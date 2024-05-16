@@ -1,3 +1,4 @@
+import { DocumentChartBarIcon } from "@heroicons/react/24/outline"
 import { finder } from "@medv/finder"
 import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
@@ -65,6 +66,8 @@ class ConfigAi implements ConfigAiInterface {
 		this.inputTypes = "input, textarea, select, label, option"
 		this.nodesToAdd = []
 		this.pagePath = window.location.origin + window.location.pathname
+		// Function Bindings
+		this.generateElementSelector = this.generateElementSelector.bind(this)
 
 		print.log(`Provider: ${this.provider} | Session: ${this.isOn}`, "#3f51b5")
 	}
@@ -265,7 +268,6 @@ class ConfigAi implements ConfigAiInterface {
 		overlay.style.width = `${rect.width}px`
 		overlay.style.height = `${rect.height}px`
 
-		this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
 
 		this.nodesToAdd.push({
@@ -326,33 +328,34 @@ class ConfigAi implements ConfigAiInterface {
 
 	disableLinkClicks(e) {
 		// Determine if clicked element is an anchor tag
-		const link = e.target.closest("a")
-		if (link) {
-			e.preventDefault()
-			e.stopPropagation()
-		}
 	}
 
 	async toggleDomListener(enable: boolean) {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
-		let generateElementSelector = this.generateElementSelector.bind(this)
+
 		if (enable) {
 			// Add Event Listeners & Overlay
 			this.createInspectOverlay()
 			document.addEventListener("click", this.disableLinkClicks, true)
 			document.addEventListener("mousemove", this.handleInspectOverlayHover)
-			document.addEventListener("click", generateElementSelector, true)
+			document.addEventListener("click", this.generateElementSelector)
 		} else {
 			// Remove Event Listeners & Overlay
 			this.removeInspectOverlay()
 			document.removeEventListener("click", this.disableLinkClicks, true)
 			document.removeEventListener("mousemove", this.handleInspectOverlayHover)
-			document.removeEventListener("click", generateElementSelector, true)
+			document.removeEventListener("click", this.generateElementSelector)
+
 			// Process Selectors
 			if (this.nodesToAdd.length > 0) {
 				let domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
 				this.cache[this.pagePath].domItems = [...this.cache[this.pagePath].domItems, ...domItems]
 				this.setCache("update", { detectedData: this.cache[this.pagePath].domItems, pagePath: this.pagePath, dataType: "domItems" })
+				document.querySelectorAll(".configai-highlight-pending").forEach((element) => {
+					element.classList.remove("configai-highlight-pending")
+					element.classList.add("configai-highlight")
+					this.addCloseButton(element)
+				})
 				this.nodesToAdd = []
 			}
 		}

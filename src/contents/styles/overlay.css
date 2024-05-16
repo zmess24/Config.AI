@@ -20,14 +20,14 @@
 }
 
 .configai-highlight {
-	background-color: rgba(165, 180, 252, 0.8);
+	background-color: rgba(165, 180, 252, 0.7);
 	border: 1px solid #4338ca;
 	transition: all 0.5s ease-in;
 }
 
 .configai-highlight-pending {
 	background-color: rgba(165, 180, 252, 0.2);
-	border: 1px solid #4338ca;
+	border: 1px solid #4438caeb;
 	transition: all 0.5s ease-in;
 }
 
@@ -56,14 +56,16 @@
 
 .inspect-overlay {
 	position: absolute;
-	background-color: rgba(0, 0, 0, 0.7);
+	background-color: rgba(165, 180, 252, 0.4);
 	color: white;
-	padding: 5px;
+	padding: 10px;
 	font-size: 12px;
 	pointer-events: none;
 	display: none;
 	z-index: 9999;
+	cursor: crosshair;
 }
+
 .inspect-toaster {
 	position: absolute;
 	background-color: rgba(0, 0, 0, 0.8);
@@ -74,6 +76,6 @@
 	display: none;
 	z-index: 9999;
 	border-radius: 4px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 	white-space: nowrap;
 }
