@@ -54,6 +54,7 @@ class ConfigAi implements ConfigAiInterface {
 	inputTypes: string
 	cache: object
 	nodesToAdd: Array<NodeToAdd>
+	pagePath: string
 
 	constructor(provider: string, isOn: boolean, host: string) {
 		this.provider = provider
@@ -63,6 +64,7 @@ class ConfigAi implements ConfigAiInterface {
 		this.nonTextBasedSelectors = "script, style, img, noscript, iframe, video, audio, canvas, meta, svg, path"
 		this.inputTypes = "input, textarea, select, label, option"
 		this.nodesToAdd = []
+		this.pagePath = window.location.origin + window.location.pathname
 
 		print.log(`Provider: ${this.provider} | Session: ${this.isOn}`, "#3f51b5")
 	}
@@ -76,6 +78,10 @@ class ConfigAi implements ConfigAiInterface {
 	setProvider(provider: string) {
 		this.provider = provider
 		provider ? print.log(`Connected to Provider: ${provider}`, "#228B22") : print.log("Disconnected Provider", "#850101")
+	}
+
+	setPagePath() {
+		this.pagePath = window.location.origin + window.location.pathname
 	}
 
 	setIsOn(isOn: boolean) {
@@ -113,7 +119,6 @@ class ConfigAi implements ConfigAiInterface {
 		let closeButton = this.addCloseButton(overlay)
 		let pagePath = window.location.origin + window.location.pathname
 		closeButton.onclick = () => {
-			console.log(pagePath, this.cache[pagePath].domItems)
 			let detectedData = this.cache[pagePath].domItems.filter((item) => item.selector !== selector)
 			this.setCache("update", { detectedData, pagePath, dataType: "domItems" })
 			overlay.remove()
@@ -237,7 +242,6 @@ class ConfigAi implements ConfigAiInterface {
 	async #sendToBackground(message: string, { name, body }) {
 		print.log(`${message}`)
 		const { result } = await sendToBackground({ name, body })
-		console.log(result.domItems)
 		return result.domItems
 	}
 
@@ -330,6 +334,7 @@ class ConfigAi implements ConfigAiInterface {
 
 		// this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
+
 		this.nodesToAdd.push({
 			selector,
 			type: "",
@@ -338,8 +343,6 @@ class ConfigAi implements ConfigAiInterface {
 			value: event.target.innerText
 		})
 
-		console.log(this.nodesToAdd)
-		// Prevents default click behavior
 		return false
 	}
 
@@ -369,26 +372,23 @@ class ConfigAi implements ConfigAiInterface {
 		const inspectToaster = document.querySelector(".inspect-toaster") as HTMLElement
 		// Get the bounding rectangle of the target element
 		const rect = target.getBoundingClientRect()
-
 		// Set the position and size of the inspect overlay
 		inspectOverlay.style.top = `${rect.top + window.scrollY}px`
 		inspectOverlay.style.left = `${rect.left + window.scrollX}px`
 		inspectOverlay.style.width = `${rect.width}px`
 		inspectOverlay.style.height = `${rect.height}px`
+		inspectOverlay.style.display = "block"
 
 		// Set the position of the inspect toaster
 		inspectToaster.style.top = `${rect.bottom + window.scrollY + 10}px`
 		inspectToaster.style.left = `${rect.left + window.scrollX}px`
+		inspectToaster.style.display = "block"
 
 		// Display the tag name and class of the target element
 		inspectToaster.textContent = `<${target.tagName.toLowerCase()}>`
 		if (target.className) {
 			inspectToaster.textContent += ` .${target.className}`
 		}
-
-		// Show the inspect overlay
-		inspectToaster.style.display = "block"
-		inspectOverlay.style.display = "block"
 	}
 
 	disableLinkClicks(e) {
@@ -403,7 +403,6 @@ class ConfigAi implements ConfigAiInterface {
 	async toggleDomListener(enable: boolean) {
 		print.log(`DOM Listener: ${enable ? "ON" : "OFF"}`, "#228B22")
 		let generateElementSelector = this.generateElementSelector.bind(this)
-		let pagePath = window.location.origin + window.location.pathname
 		if (enable) {
 			// Add Event Listeners & Overlay
 			this.createInspectOverlay()
@@ -418,9 +417,9 @@ class ConfigAi implements ConfigAiInterface {
 			document.removeEventListener("click", generateElementSelector, true)
 			// Process Selectors
 			if (this.nodesToAdd.length > 0) {
-				let domItems = await this.#sendToBackground(`Refining Selectors for ${pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
-				this.cache[pagePath].domItems = [...this.cache[pagePath].domItems, ...domItems]
-				this.setCache("update", { detectedData: this.cache[pagePath].domItems, pagePath, dataType: "domItems" })
+				let domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
+				this.cache[this.pagePath].domItems = [...this.cache[this.pagePath].domItems, ...domItems]
+				this.setCache("update", { detectedData: this.cache[this.pagePath].domItems, pagePath: this.pagePath, dataType: "domItems" })
 			}
 			this.nodesToAdd = []
 		}
@@ -428,25 +427,24 @@ class ConfigAi implements ConfigAiInterface {
 
 	scanPageForPII() {
 		try {
-			let pagePath = window.location.origin + window.location.pathname
-			if (this.isOn && !this.cache[pagePath]) {
+			if (this.isOn && !this.cache[this.pagePath]) {
 				setTimeout(async () => {
 					let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
-					let domItems = await this.#sendToBackground(`Scanning ${pagePath}`, { name: "pii/identify", body: { pageText } })
+					let domItems = await this.#sendToBackground(`Scanning ${this.pagePath}`, { name: "pii/identify", body: { pageText } })
 
 					if (domItems.length > 0) {
 						domItems = this.#findNodesWithPII(domItems)
-						domItems = await this.#sendToBackground(`Refining Selectors for ${pagePath}`, { name: "pii/refine", body: { domItems } })
+						domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems } })
 					}
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
-					this.setCache("update", { detectedData: domItems, pagePath, dataType: "domItems" })
+					this.setCache("update", { detectedData: domItems, pagePath: this.pagePath, dataType: "domItems" })
 				}, 3000)
 			} else if (this.isOn) {
 				setTimeout(async () => {
-					let domItems = this.cache[pagePath].domItems
-					print.table("PII/PCI Found", domItems)
+					let domItems = this.cache[this.pagePath].domItems
 					this.#highlightNodesWithPII(domItems)
+					print.table("PII/PCI Found", domItems)
 				}, 3000)
 			}
 		} catch (err) {
