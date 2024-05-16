@@ -80,6 +80,12 @@
 	white-space: nowrap;
 }
 
+/**
+|--------------------------------------------------
+| Loading Popup Styles
+|--------------------------------------------------
+*/
+
 /* Popup overlay */
 .popup-overlay {
 	position: fixed;
@@ -102,11 +108,16 @@
 
 /* Popup content */
 .popup-content {
-	background: white;
+	background-color: rgb(241 245 249);
+	width: 225px;
+	height: 140px;
 	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
 	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 /* Loading icon */

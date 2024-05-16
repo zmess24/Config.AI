@@ -328,7 +328,10 @@ class ConfigAi implements ConfigAiInterface {
 
 	disableLinkClicks(e) {
 		const link = e.target.closest("a")
-		if (link) e.preventDefault()
+		if (link) {
+			e.preventDefault()
+			e.stopPropagation()
+		}
 	}
 
 	showLoadingPopup(initialMessage: string) {
@@ -389,6 +392,7 @@ class ConfigAi implements ConfigAiInterface {
 
 			// Process Selectors
 			if (this.nodesToAdd.length > 0) {
+				const loadingOverlay = this.showLoadingPopup("Refining Selectors")
 				let domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
 				this.cache[this.pagePath].domItems = [...this.cache[this.pagePath].domItems, ...domItems]
 				this.setCache("update", { detectedData: this.cache[this.pagePath].domItems, pagePath: this.pagePath, dataType: "domItems" })
@@ -396,6 +400,7 @@ class ConfigAi implements ConfigAiInterface {
 					element.classList.remove("configai-highlight-pending")
 					element.classList.add("configai-highlight")
 					this.addCloseButton(element)
+					this.hideLoadingPopup(loadingOverlay)
 				})
 				this.nodesToAdd = []
 			}
