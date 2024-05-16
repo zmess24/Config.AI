@@ -327,7 +327,8 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	disableLinkClicks(e) {
-		// Determine if clicked element is an anchor tag
+		const link = e.target.closest("a")
+		if (link) e.preventDefault()
 	}
 
 	async toggleDomListener(enable: boolean) {
