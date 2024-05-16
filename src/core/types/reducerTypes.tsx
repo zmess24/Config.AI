@@ -31,7 +31,8 @@ interface RecordedPagesType {
 export interface SessionStateTypes {
 	recordedPages: RecordedPagesType
 	isOn: boolean
-	domListenerOn: boolean
+	domListenerOn: boolean,
+	host: string
 }
 
 interface RuleTypes {

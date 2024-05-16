@@ -30,7 +30,7 @@ export const generateSelectorsSchema = {
 						},
 						selector: {
 							type: "string",
-							description: "The CSS selector for the identified value."
+							description: "The original CSS selector for the identified value."
 						},
 						refinedSelector: {
 							type: "string",

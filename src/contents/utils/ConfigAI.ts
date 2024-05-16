@@ -114,7 +114,7 @@ class ConfigAi implements ConfigAiInterface {
 	createOverlay(targetElement, selector) {
 		// Create an overlay element
 		const overlay = document.createElement("div.")
-		overlay.className = "configai-overlay"
+		overlay.className = "configai-overlay configai-highlight"
 		// Create a close button and append it to the overlay
 		let closeButton = this.addCloseButton(overlay)
 		let pagePath = window.location.origin + window.location.pathname
@@ -178,9 +178,7 @@ class ConfigAi implements ConfigAiInterface {
 				if (data.typeOfInformation !== "Input") {
 					if (data.selector) createOverlay(element, data.selector)
 				} else {
-					element.style.transition = "all 0.5s ease-in"
-					element.style.backgroundColor = "#A5B4FC"
-					element.style.border = "2px solid #4338ca"
+					element.className += " configai-highlight"
 				}
 			})
 		})
@@ -251,71 +249,6 @@ class ConfigAi implements ConfigAiInterface {
     |--------------------------------------------------
     */
 
-	injectCSS() {
-		const style = document.createElement("style")
-		style.id = "config-ai"
-		style.textContent = `
-		  .configai-overlay {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: rgb(165 180 252);
-			z-index: 1000;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			color: white;
-			font-size: 10px;
-			transition: all 0.5s ease-in;
-			border: 2px solid #4338ca;
-			opacity: 0.8;
-			padding: 2px;
-		  }
-		  .configai-close-button {
-			position: absolute;
-			top: -10px;
-			right: -10px;
-			cursor: pointer;
-			background: #444;
-			color: white;
-			width: 15px;
-			height: 15px;
-			line-height: 15px;
-			text-align: center;
-			border-radius: 50%;
-			font-size: 9px;
-			font-weight: bold;
-			user-select: none;
-		  }
-		  .inspect-overlay {
-			position: absolute;
-			background-color: rgba(0, 0, 0, 0.7);
-			color: white;
-			padding: 5px;
-			font-size: 12px;
-			pointer-events: none;
-			display: none;
-			z-index: 9999;
-		  }
-		  .inspect-toaster {
-			position: absolute;
-			background-color: rgba(0, 0, 0, 0.8);
-			color: white;
-			padding: 8px;
-			font-size: 14px;
-			pointer-events: none;
-			display: none;
-			z-index: 9999;
-			border-radius: 4px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-			white-space: nowrap;
-		  }
-		`
-		document.head.appendChild(style)
-	}
-
 	generateSelector(node) {
 		return finder(node.parentNode, { optimizedMinLength: 2 })
 	}
@@ -324,7 +257,7 @@ class ConfigAi implements ConfigAiInterface {
 		let selector = finder(event.target, { optimizedMinLength: 2 })
 		// Create Overlapy
 		const overlay = document.createElement("div")
-		overlay.className = "configai-overlay"
+		overlay.className = "configai-overlay configai-highlight-pending"
 
 		const rect = event.target.getBoundingClientRect()
 		overlay.style.top = `${rect.top + window.scrollY}px`
@@ -332,7 +265,7 @@ class ConfigAi implements ConfigAiInterface {
 		overlay.style.width = `${rect.width}px`
 		overlay.style.height = `${rect.height}px`
 
-		// this.addCloseButton(overlay)
+		this.addCloseButton(overlay)
 		document.body.appendChild(overlay)
 
 		this.nodesToAdd.push({
@@ -420,8 +353,8 @@ class ConfigAi implements ConfigAiInterface {
 				let domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems: this.nodesToAdd } })
 				this.cache[this.pagePath].domItems = [...this.cache[this.pagePath].domItems, ...domItems]
 				this.setCache("update", { detectedData: this.cache[this.pagePath].domItems, pagePath: this.pagePath, dataType: "domItems" })
+				this.nodesToAdd = []
 			}
-			this.nodesToAdd = []
 		}
 	}
 
