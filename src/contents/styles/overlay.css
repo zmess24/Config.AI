@@ -92,6 +92,12 @@
 	justify-content: center;
 	align-items: center;
 	z-index: 10000;
+	opacity: 0; /* Start hidden */
+	transition: opacity 0.5s ease; /* Transition for fade in/out */
+}
+
+.visible {
+	opacity: 1;
 }
 
 /* Popup content */
@@ -101,7 +107,6 @@
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
 	text-align: center;
-	z-index: 99999;
 }
 
 /* Loading icon */
@@ -122,4 +127,9 @@
 	100% {
 		transform: rotate(360deg);
 	}
+}
+
+/* Visible state for the overlay */
+.popup-overlay.visible {
+	opacity: 1; /* Fully visible */
 }

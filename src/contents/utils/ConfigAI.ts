@@ -331,22 +331,44 @@ class ConfigAi implements ConfigAiInterface {
 		if (link) e.preventDefault()
 	}
 
-	showLoadingPopup() {
+	showLoadingPopup(initialMessage: string) {
 		const overlay = document.createElement("div")
 		overlay.classList.add("popup-overlay")
 		overlay.innerHTML = `
 		  <div class="popup-content">
-			<p>Loading...</p>
+		  	<strong>Config.AI</strong>	
+			<p>${initialMessage}</p>
 			<div class="loading-icon"></div>
 		  </div>
 		`
 		document.body.appendChild(overlay)
-		debugger
+		// Trigger reflow to apply the transition
+		requestAnimationFrame(() => {
+			overlay.classList.add("visible")
+		})
+
 		return overlay
 	}
 
+	updateLoadingPopup(message) {
+		document.querySelector(".popup-content p").textContent = message
+	}
+
+	// Function to hide the loading popup
 	hideLoadingPopup(overlay) {
-		if (overlay) overlay.remove()
+		if (overlay) {
+			// Remove the 'visible' class to trigger fade-out
+			overlay.classList.remove("visible")
+
+			// Wait for the transition to complete before removing the element
+			overlay.addEventListener(
+				"transitionend",
+				() => {
+					overlay.remove()
+				},
+				{ once: true }
+			)
+		}
 	}
 
 	async toggleDomListener(enable: boolean) {
@@ -384,12 +406,13 @@ class ConfigAi implements ConfigAiInterface {
 		try {
 			if (this.isOn && !this.cache[this.pagePath]) {
 				setTimeout(async () => {
-					const loadingOverlay = this.showLoadingPopup()
+					const loadingOverlay = this.showLoadingPopup("Scanning Page for PII")
 					let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
 					let domItems = await this.#sendToBackground(`Scanning ${this.pagePath}`, { name: "pii/identify", body: { pageText } })
 
 					if (domItems.length > 0) {
 						domItems = this.#findNodesWithPII(domItems)
+						this.updateLoadingPopup("Refining Selectors")
 						domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems } })
 					}
 					domItems = this.#findInputFields(domItems)
@@ -399,17 +422,14 @@ class ConfigAi implements ConfigAiInterface {
 				}, 3000)
 			} else if (this.isOn) {
 				setTimeout(async () => {
-					const loadingOverlay = this.showLoadingPopup()
 					let domItems = this.cache[this.pagePath].domItems
 					this.#highlightNodesWithPII(domItems)
 					print.table("PII/PCI Found", domItems)
-					this.hideLoadingPopup(loadingOverlay)
 				}, 3000)
 			}
 		} catch (err) {
 			print.log(`Error Message: ${err.message}`)
 		}
-		// this.hideLoadingPopup(loadingOverlay)
 	}
 }
 
