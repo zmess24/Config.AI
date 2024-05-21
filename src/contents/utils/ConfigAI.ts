@@ -147,29 +147,50 @@ class ConfigAi implements ConfigAiInterface {
     |--------------------------------------------------
     */
 
-	#createTreeWalker(nodeFilter) {
-		return document.createTreeWalker(document.body, nodeFilter, null)
-	}
-
-	#findNodesWithPII(domItems: Array<DomItemTypes>) {
-		const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
+	#scanTextNodes() {
+		// Init DOM Walker
+		const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null)
+		// State Variables
+		const resultsToSend = {}
+		const resultsToStore = {}
+		let id = 0
 		let node
 
 		while ((node = walker.nextNode())) {
-			domItems.forEach((data) => {
-				let nodeText = node.textContent.toLowerCase()
-				if (nodeText.includes(data.value.toLowerCase()) && !["SCRIPT", "INPUT"].includes(node.parentNode.nodeName)) {
-					if (node.parentNode.nodeName !== "LABEL") {
-						data.selector = finder(node.parentNode, { optimizedMinLength: 2 })
-					} else {
-						data.delete = true
-					}
-				}
-			})
+			if (!["SCRIPT", "INPUT", "LABEL"].includes(node.parentNode.nodeName) && node.textContent !== " ") {
+				resultsToStore[id] = { node: finder(node.parentNode), nodeText: node.textContent, id }
+				resultsToSend[id] = node.textContent
+				id++
+			}
 		}
 
-		return domItems.filter((item: DomItemTypes) => !item.delete)
+		return { resultsToSend, resultsToStore }
 	}
+
+	#findTextNodeSelectors(resultsToStore: any, domItems: any) {
+		domItems.forEach((item) => (item.selector = resultsToStore[item.id].node))
+		return domItems
+	}
+
+	// #findNodesWithPII(domItems: Array<DomItemTypes>) {
+	// 	const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
+	// 	let node
+
+	// 	while ((node = walker.nextNode())) {
+	// 		domItems.forEach((data) => {
+	// 			let nodeText = node.textContent.toLowerCase()
+	// 			if (nodeText.includes(data.value.toLowerCase()) && !["SCRIPT", "INPUT"].includes(node.parentNode.nodeName)) {
+	// 				if (node.parentNode.nodeName !== "LABEL") {
+	// 					data.selector = finder(node.parentNode, { optimizedMinLength: 2 })
+	// 				} else {
+	// 					data.delete = true
+	// 				}
+	// 			}
+	// 		})
+	// 	}
+
+	// 	return domItems.filter((item: DomItemTypes) => !item.delete)
+	// }
 
 	#highlightNodesWithPII(domItems) {
 		// Bind the current instance of the class to the function
@@ -412,14 +433,15 @@ class ConfigAi implements ConfigAiInterface {
 			if (this.isOn && !this.cache[this.pagePath]) {
 				setTimeout(async () => {
 					const loadingOverlay = this.showLoadingPopup("Scanning Page for PII")
-					let pageText = document.querySelector("body").innerText.replace(/\n/g, " ")
-					let domItems = await this.#sendToBackground(`Scanning ${this.pagePath}`, { name: "pii/identify", body: { pageText } })
-
+					let { resultsToSend, resultsToStore } = this.#scanTextNodes()
+					let domItems = await this.#sendToBackground(`Scanning ${this.pagePath}`, { name: "pii/identify", body: { pageText: JSON.stringify(resultsToSend) } })
+					console.log(domItems)
 					if (domItems.length > 0) {
-						domItems = this.#findNodesWithPII(domItems)
+						domItems = this.#findTextNodeSelectors(resultsToStore, domItems)
 						this.updateLoadingPopup("Refining Selectors")
 						domItems = await this.#sendToBackground(`Refining Selectors for ${this.pagePath}`, { name: "pii/refine", body: { domItems } })
 					}
+
 					domItems = this.#findInputFields(domItems)
 					this.#highlightNodesWithPII(domItems)
 					this.setCache("update", { detectedData: domItems, pagePath: this.pagePath, dataType: "domItems" })
