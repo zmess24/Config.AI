@@ -1,4 +1,3 @@
-import { DocumentChartBarIcon } from "@heroicons/react/24/outline"
 import { finder } from "@medv/finder"
 import { sendToBackground } from "@plasmohq/messaging"
 import { print } from "./print"
@@ -157,8 +156,8 @@ class ConfigAi implements ConfigAiInterface {
 		let node
 
 		while ((node = walker.nextNode())) {
-			if (!["SCRIPT", "INPUT", "LABEL"].includes(node.parentNode.nodeName) && node.textContent !== " ") {
-				resultsToStore[id] = { node: finder(node.parentNode), nodeText: node.textContent, id }
+			if (!["SCRIPT", "INPUT", "LABEL", "BODY"].includes(node.parentNode.nodeName) && ![" ", "\n"].includes(node.textContent)) {
+				resultsToStore[id] = { node: node.parentNode, nodeText: node.textContent, id }
 				resultsToSend[id] = node.textContent
 				id++
 			}
@@ -168,29 +167,9 @@ class ConfigAi implements ConfigAiInterface {
 	}
 
 	#findTextNodeSelectors(resultsToStore: any, domItems: any) {
-		domItems.forEach((item) => (item.selector = resultsToStore[item.id].node))
+		domItems.forEach((item) => (item.selector = finder(resultsToStore[item.id].node)))
 		return domItems
 	}
-
-	// #findNodesWithPII(domItems: Array<DomItemTypes>) {
-	// 	const walker = this.#createTreeWalker(NodeFilter.SHOW_TEXT)
-	// 	let node
-
-	// 	while ((node = walker.nextNode())) {
-	// 		domItems.forEach((data) => {
-	// 			let nodeText = node.textContent.toLowerCase()
-	// 			if (nodeText.includes(data.value.toLowerCase()) && !["SCRIPT", "INPUT"].includes(node.parentNode.nodeName)) {
-	// 				if (node.parentNode.nodeName !== "LABEL") {
-	// 					data.selector = finder(node.parentNode, { optimizedMinLength: 2 })
-	// 				} else {
-	// 					data.delete = true
-	// 				}
-	// 			}
-	// 		})
-	// 	}
-
-	// 	return domItems.filter((item: DomItemTypes) => !item.delete)
-	// }
 
 	#highlightNodesWithPII(domItems) {
 		// Bind the current instance of the class to the function
